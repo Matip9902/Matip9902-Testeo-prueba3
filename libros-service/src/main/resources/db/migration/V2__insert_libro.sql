@@ -1,0 +1,16 @@
+INSERT INTO libro (id, titulo, id_autor, stock) VALUES
+(1, 'Cien anos de soledad', 1, 12),
+(2, 'La casa de los espiritus', 2, 9),
+(3, 'Ficciones', 3, 7),
+(4, 'La ciudad y los perros', 4, 6),
+(5, 'Veinte poemas de amor', 5, 10),
+(6, 'Rayuela', 6, 8),
+(7, 'Como agua para chocolate', 7, 11),
+(8, 'Don Quijote de la Mancha', 8, 5),
+(9, 'Orgullo y prejuicio', 9, 13),
+(10, '1984', 10, 15),
+(11, 'El senor de los anillos', 11, 4),
+(12, 'El principito', 12, 20),
+(13, 'Frankenstein', 13, 6),
+(14, 'Crimen y castigo', 14, 7),
+(15, 'Matar a un ruisenor', 15, 9);

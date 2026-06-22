@@ -1,0 +1,57 @@
+﻿spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          discovery:
+            locator:
+              enabled: true
+              lower-case-service-id: true
+          routes:
+            - id: clientes-service
+              uri: lb://CLIENTES-SERVICE
+              predicates:
+                - Path=/api/v1/clientes/**
+            - id: libros-service
+              uri: lb://LIBROS-SERVICE
+              predicates:
+                - Path=/api/v1/libros/**
+            - id: prestamos-service
+              uri: lb://PRESTAMOS-SERVICE
+              predicates:
+                - Path=/api/v1/prestamos/**
+            - id: multas-service
+              uri: lb://MULTAS-SERVICE
+              predicates:
+                - Path=/api/v1/multas/**
+            - id: autor-service
+              uri: lb://AUTOR-SERVICE
+              predicates:
+                - Path=/api/v1/autores/**
+            - id: sucursal-service
+              uri: lb://SUCURSAL-SERVICE
+              predicates:
+                - Path=/api/v1/sucursales/**
+            - id: empleado-service
+              uri: lb://EMPLEADO-SERVICE
+              predicates:
+                - Path=/api/v1/empleados/**
+            - id: reserva-service
+              uri: lb://RESERVA-SERVICE
+              predicates:
+                - Path=/api/v1/reservas/**
+
+server:
+  port: ${SERVER_PORT:62000}
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://localhost:56231/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    instance-id: ${spring.application.name}:${random.uuid}

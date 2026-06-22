@@ -1,0 +1,16 @@
+INSERT INTO empleado (id, nombre, apellido, edad, email, cargo, id_sucursal) VALUES
+(1, 'Antonio', 'Garcia', 28, 'antonio.garcia@bibliotech.cl', 'Bibliotecario', 1),
+(2, 'Carla', 'Lopez', 34, 'carla.lopez@bibliotech.cl', 'Supervisor', 1),
+(3, 'Bruno', 'Martinez', 24, 'bruno.martinez@bibliotech.cl', 'Asistente', 2),
+(4, 'Daniela', 'Rojas', 31, 'daniela.rojas@bibliotech.cl', 'Bibliotecario', 2),
+(5, 'Esteban', 'Munoz', 29, 'esteban.munoz@bibliotech.cl', 'Operador', 3),
+(6, 'Fernanda', 'Soto', 27, 'fernanda.soto@bibliotech.cl', 'Bibliotecario', 3),
+(7, 'Gonzalo', 'Vera', 38, 'gonzalo.vera@bibliotech.cl', 'Supervisor', 4),
+(8, 'Helena', 'Campos', 26, 'helena.campos@bibliotech.cl', 'Asistente', 5),
+(9, 'Ignacio', 'Silva', 33, 'ignacio.silva@bibliotech.cl', 'Operador', 6),
+(10, 'Javiera', 'Paz', 25, 'javiera.paz@bibliotech.cl', 'Bibliotecario', 7),
+(11, 'Kevin', 'Araya', 30, 'kevin.araya@bibliotech.cl', 'Asistente', 8),
+(12, 'Laura', 'Reyes', 36, 'laura.reyes@bibliotech.cl', 'Supervisor', 9),
+(13, 'Marco', 'Castro', 41, 'marco.castro@bibliotech.cl', 'Jefe de Sucursal', 10),
+(14, 'Natalia', 'Fuentes', 32, 'natalia.fuentes@bibliotech.cl', 'Bibliotecario', 11),
+(15, 'Oscar', 'Medina', 29, 'oscar.medina@bibliotech.cl', 'Operador', 12);

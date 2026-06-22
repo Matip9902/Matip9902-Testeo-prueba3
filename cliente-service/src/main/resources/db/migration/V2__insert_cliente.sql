@@ -1,0 +1,16 @@
+INSERT INTO cliente (id, nombre, email, password) VALUES
+(1, 'Ana Torres', 'ana.torres@bibliotech.cl', 'cliente123'),
+(2, 'Bruno Rojas', 'bruno.rojas@bibliotech.cl', 'cliente123'),
+(3, 'Camila Soto', 'camila.soto@bibliotech.cl', 'cliente123'),
+(4, 'Diego Herrera', 'diego.herrera@bibliotech.cl', 'cliente123'),
+(5, 'Elena Fuentes', 'elena.fuentes@bibliotech.cl', 'cliente123'),
+(6, 'Felipe Molina', 'felipe.molina@bibliotech.cl', 'cliente123'),
+(7, 'Gabriela Vera', 'gabriela.vera@bibliotech.cl', 'cliente123'),
+(8, 'Hector Silva', 'hector.silva@bibliotech.cl', 'cliente123'),
+(9, 'Isidora Lagos', 'isidora.lagos@bibliotech.cl', 'cliente123'),
+(10, 'Javier Castro', 'javier.castro@bibliotech.cl', 'cliente123'),
+(11, 'Karina Paredes', 'karina.paredes@bibliotech.cl', 'cliente123'),
+(12, 'Luis Araya', 'luis.araya@bibliotech.cl', 'cliente123'),
+(13, 'Monica Reyes', 'monica.reyes@bibliotech.cl', 'cliente123'),
+(14, 'Nicolas Campos', 'nicolas.campos@bibliotech.cl', 'cliente123'),
+(15, 'Olivia Medina', 'olivia.medina@bibliotech.cl', 'cliente123');

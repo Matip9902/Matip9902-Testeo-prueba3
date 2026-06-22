@@ -1,0 +1,16 @@
+INSERT INTO autor (id, nombre, apellido, nacionalidad) VALUES
+(1, 'Gabriel', 'Garcia Marquez', 'Colombiana'),
+(2, 'Isabel', 'Allende', 'Chilena'),
+(3, 'Jorge Luis', 'Borges', 'Argentina'),
+(4, 'Mario', 'Vargas Llosa', 'Peruana'),
+(5, 'Pablo', 'Neruda', 'Chilena'),
+(6, 'Julio', 'Cortazar', 'Argentina'),
+(7, 'Laura', 'Esquivel', 'Mexicana'),
+(8, 'Miguel', 'de Cervantes', 'Espanola'),
+(9, 'Jane', 'Austen', 'Britanica'),
+(10, 'George', 'Orwell', 'Britanica'),
+(11, 'J.R.R.', 'Tolkien', 'Britanica'),
+(12, 'Antoine', 'de Saint-Exupery', 'Francesa'),
+(13, 'Mary', 'Shelley', 'Britanica'),
+(14, 'Fedor', 'Dostoievski', 'Rusa'),
+(15, 'Harper', 'Lee', 'Estadounidense');

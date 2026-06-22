@@ -1,0 +1,6 @@
+CREATE TABLE IF NOT EXISTS sucursal (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    comuna VARCHAR(150) NOT NULL,
+    direccion VARCHAR(255) NOT NULL,
+    cantidad_empleados INT NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

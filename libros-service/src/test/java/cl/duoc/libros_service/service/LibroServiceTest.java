@@ -1,0 +1,184 @@
+package cl.duoc.libros_service.service;
+
+import cl.duoc.libros_service.client.AutorClient;
+import cl.duoc.libros_service.dto.AutorDTO;
+import cl.duoc.libros_service.dto.LibroDTO;
+import cl.duoc.libros_service.mapper.LibroMapper;
+import cl.duoc.libros_service.model.Libro;
+import cl.duoc.libros_service.repository.LibroRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+
+@ExtendWith(MockitoExtension.class)
+class LibroServiceTest {
+
+    @Mock
+    private LibroRepository libroRepository;
+
+    @Mock
+    private LibroMapper libroMapper;
+
+    @Mock
+    private AutorClient autorClient;
+
+    @InjectMocks
+    private LibroService libroService;
+
+    private Libro libro;
+    private AutorDTO autorDTO;
+    private LibroDTO libroDTO;
+
+    @BeforeEach
+    void setUp() {
+        // Inicializamos los objetos que usaremos en las pruebas
+        libro = new Libro(1L, "El Señor de los Anillos", 100L, 5L);
+
+        autorDTO = new AutorDTO(); // Asumiendo que tiene constructor vacío, ajusta si es necesario
+        autorDTO.setId(100L);
+        autorDTO.setNombre("J.R.R. Tolkien");
+
+        libroDTO = new LibroDTO();
+        libroDTO.setId(1L);
+        libroDTO.setTitulo("El Señor de los Anillos");
+        libroDTO.setAutor(autorDTO);
+        libroDTO.setStock(5L);
+    }
+
+    @Test
+    void findAllDebeRetornarLibrosMapeados() {
+        when(libroRepository.findAll()).thenReturn(List.of(libro));
+        when(autorClient.buscarPorId(100L)).thenReturn(autorDTO);
+        when(libroMapper.toDTO(libro, autorDTO)).thenReturn(libroDTO);
+
+        List<LibroDTO> resultado = libroService.findAll();
+
+        assertEquals(1, resultado.size());
+        assertEquals("El Señor de los Anillos", resultado.get(0).getTitulo());
+        assertEquals("J.R.R. Tolkien", resultado.get(0).getAutor().getNombre());
+
+        verify(libroRepository).findAll();
+        verify(autorClient).buscarPorId(100L);
+        verify(libroMapper).toDTO(libro, autorDTO);
+    }
+
+    @Test
+    void findByIdDebeRetornarLibroCuandoExiste() {
+        when(libroRepository.findById(1L)).thenReturn(Optional.of(libro));
+        when(autorClient.buscarPorId(100L)).thenReturn(autorDTO);
+        when(libroMapper.toDTO(libro, autorDTO)).thenReturn(libroDTO);
+
+        LibroDTO resultado = libroService.findById(1L);
+
+        assertEquals(1L, resultado.getId());
+        assertEquals(5L, resultado.getStock());
+        verify(libroRepository).findById(1L);
+    }
+
+    @Test
+    void findByIdDebeLanzarErrorCuandoIdEsInvalido() {
+        IllegalArgumentException error = assertThrows(
+                IllegalArgumentException.class,
+                () -> libroService.findById(-1L)
+        );
+
+        assertTrue(error.getMessage().contains("positivo"));
+        verify(libroRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    void saveDebeGuardarLibroValido() {
+        when(libroRepository.save(libro)).thenReturn(libro);
+        when(autorClient.buscarPorId(100L)).thenReturn(autorDTO);
+        when(libroMapper.toDTO(libro, autorDTO)).thenReturn(libroDTO);
+
+        LibroDTO resultado = libroService.save(libro);
+
+        assertEquals("El Señor de los Anillos", resultado.getTitulo());
+        verify(libroRepository).save(libro);
+        verify(autorClient).buscarPorId(100L);
+    }
+
+    @Test
+    void saveDebeLanzarErrorCuandoTituloEsNuloOBlanco() {
+        libro.setTitulo("");
+
+        IllegalArgumentException error = assertThrows(
+                IllegalArgumentException.class,
+                () -> libroService.save(libro)
+        );
+
+        assertTrue(error.getMessage().contains("título es obligatorio"));
+        verify(libroRepository, never()).save(any(Libro.class));
+    }
+
+    @Test
+    void deleteDebeEliminarLibroCuandoExiste() {
+        when(libroRepository.existsById(1L)).thenReturn(true);
+
+        libroService.delete(1L);
+
+        verify(libroRepository).existsById(1L);
+        verify(libroRepository).deleteById(1L);
+    }
+
+    @Test
+    void deleteDebeLanzarErrorCuandoNoExiste() {
+        when(libroRepository.existsById(1L)).thenReturn(false);
+
+        RuntimeException error = assertThrows(
+                RuntimeException.class,
+                () -> libroService.delete(1L)
+        );
+
+        assertTrue(error.getMessage().contains("no encontrado"));
+        verify(libroRepository, never()).deleteById(anyLong());
+    }
+
+    @Test
+    void findBajoStockDebeRetornarListaDeLibros() {
+        when(libroRepository.findByStockLessThanEqual(2L)).thenReturn(List.of(libro));
+        when(autorClient.buscarPorId(100L)).thenReturn(autorDTO);
+        when(libroMapper.toDTO(libro, autorDTO)).thenReturn(libroDTO);
+
+        List<LibroDTO> resultado = libroService.findBajoStock(2L);
+
+        assertEquals(1, resultado.size());
+        verify(libroRepository).findByStockLessThanEqual(2L);
+    }
+
+    @Test
+    void findBajoStockDebeValidarMaximoNegativo() {
+        IllegalArgumentException error = assertThrows(
+                IllegalArgumentException.class,
+                () -> libroService.findBajoStock(-1L)
+        );
+
+        assertTrue(error.getMessage().contains("mayor o igual a 0"));
+    }
+
+    @Test
+    void countDebeRetornarCantidadTotal() {
+        when(libroRepository.count()).thenReturn(15L);
+
+        Long resultado = libroService.count();
+
+        assertEquals(15L, resultado);
+        verify(libroRepository).count();
+    }
+}

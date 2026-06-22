@@ -1,0 +1,16 @@
+INSERT INTO sucursal (id, comuna, direccion, cantidad_empleados) VALUES
+(1, 'Santiago', 'Av. Libertador 1234', 5),
+(2, 'Providencia', 'Av. Providencia 567', 4),
+(3, 'Las Condes', 'Av. Apoquindo 890', 4),
+(4, 'Nunoa', 'Irarrázaval 2100', 3),
+(5, 'La Florida', 'Vicuña Mackenna 8200', 3),
+(6, 'Maipu', 'Av. Pajaritos 3400', 3),
+(7, 'Puente Alto', 'Concha y Toro 1200', 3),
+(8, 'Quilicura', 'Matta 450', 2),
+(9, 'Recoleta', 'Recoleta 980', 2),
+(10, 'Independencia', 'Independencia 650', 2),
+(11, 'Macul', 'Macul 3100', 2),
+(12, 'San Miguel', 'Gran Avenida 5100', 2),
+(13, 'Estacion Central', 'Alameda 3800', 2),
+(14, 'La Reina', 'Principe de Gales 7200', 2),
+(15, 'Vitacura', 'Vitacura 6800', 2);

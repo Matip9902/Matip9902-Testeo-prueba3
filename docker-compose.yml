@@ -1,0 +1,230 @@
+﻿services:
+  mysql:
+    image: mysql:8.4
+    container_name: bibliotech-mysql
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "${MYSQL_PORT:-0}:3306"
+    volumes:
+      - bibliotech-mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  eureka-service:
+    build: ./eureka-service
+    container_name: eureka-service
+    environment:
+      SERVER_PORT: 56231
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "false"
+      EUREKA_CLIENT_FETCH_REGISTRY: "false"
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
+    ports:
+      - "${EUREKA_PORT:-0}:56231"
+
+  config-server:
+    build: ./config-server
+    container_name: config-server
+    environment:
+      SERVER_PORT: 58080
+      CONFIG_SEARCH_LOCATIONS: file:/config-microservicios
+    volumes:
+      - ./config-microservicios:/config-microservicios:ro
+    ports:
+      - "${CONFIG_SERVER_PORT:-0}:57184"
+    depends_on:
+      - eureka-service
+
+  autor-service:
+    build: ./autor-service
+    ports:
+      - "${AUTOR_SWAGGER_PORT:-0}:8080"
+    environment:
+      SERVER_PORT: 8080
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_autores_bibliotech?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ""
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-service:
+        condition: service_started
+      config-server:
+        condition: service_started
+
+  cliente-service:
+    build: ./cliente-service
+    environment:
+      SERVER_PORT: 8080
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_clientes_bibliotech?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ""
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-service:
+        condition: service_started
+      config-server:
+        condition: service_started
+
+  empleado-service:
+    build: ./empleado-service
+    environment:
+      SERVER_PORT: 8080
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_empleados_bibliotech?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ""
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-service:
+        condition: service_started
+      config-server:
+        condition: service_started
+      sucursal-service:
+        condition: service_started
+
+  libros-service:
+    build: ./libros-service
+    environment:
+      SERVER_PORT: 8080
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_libros_bibliotech?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ""
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-service:
+        condition: service_started
+      config-server:
+        condition: service_started
+      autor-service:
+        condition: service_started
+
+  multa-service:
+    build: ./multa-service
+    environment:
+      SERVER_PORT: 8080
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_multas_bibliotech?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ""
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-service:
+        condition: service_started
+      config-server:
+        condition: service_started
+      cliente-service:
+        condition: service_started
+      prestamos-service:
+        condition: service_started
+
+  prestamos-service:
+    build: ./prestamos-service
+    environment:
+      SERVER_PORT: 8080
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_prestamos_bibliotech?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ""
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-service:
+        condition: service_started
+      config-server:
+        condition: service_started
+      cliente-service:
+        condition: service_started
+      libros-service:
+        condition: service_started
+
+  reserva-service:
+    build: ./reserva-service
+    environment:
+      SERVER_PORT: 8080
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_reservas_bibliotech?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ""
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-service:
+        condition: service_started
+      config-server:
+        condition: service_started
+
+  sucursal-service:
+    build: ./sucursal-service
+    ports:
+      - "${SUCURSAL_SWAGGER_PORT:-0}:8080"
+    environment:
+      SERVER_PORT: 8080
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
+      EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
+      EUREKA_CLIENT_FETCH_REGISTRY: "true"
+      EUREKA_INSTANCE_PREFER_IP_ADDRESS: "true"
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/bd_sucursales_bibliotech?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: ""
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-service:
+        condition: service_started
+      config-server:
+        condition: service_started
+
+  api-gateway:
+    build: ./api-gateway
+    container_name: api-gateway
+    environment:
+      SERVER_PORT: 62000
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
+    ports:
+      - "${API_GATEWAY_PORT:-0}:62000"
+    depends_on:
+      - eureka-service
+      - config-server
+      - autor-service
+      - cliente-service
+      - empleado-service
+      - libros-service
+      - multa-service
+      - prestamos-service
+      - reserva-service
+      - sucursal-service
+
+volumes:
+  bibliotech-mysql-data:

@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: config-server
+  profiles:
+    active: native
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: ${CONFIG_SEARCH_LOCATIONS:file:./config-microservicios,file:../config-microservicios}
+
+server:
+  port: ${SERVER_PORT:57184}
