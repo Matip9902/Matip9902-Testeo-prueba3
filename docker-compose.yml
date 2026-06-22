@@ -40,6 +40,7 @@
 
   autor-service:
     build: ./autor-service
+    restart: on-failure
     ports:
       - "${AUTOR_SWAGGER_PORT:-0}:8080"
     environment:
@@ -61,6 +62,7 @@
 
   cliente-service:
     build: ./cliente-service
+    restart: on-failure
     environment:
       SERVER_PORT: 8080
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
@@ -80,6 +82,7 @@
 
   empleado-service:
     build: ./empleado-service
+    restart: on-failure
     environment:
       SERVER_PORT: 8080
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
@@ -101,6 +104,7 @@
 
   libros-service:
     build: ./libros-service
+    restart: on-failure
     environment:
       SERVER_PORT: 8080
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
@@ -122,6 +126,7 @@
 
   multa-service:
     build: ./multa-service
+    restart: on-failure
     environment:
       SERVER_PORT: 8080
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
@@ -145,6 +150,7 @@
 
   prestamos-service:
     build: ./prestamos-service
+    restart: on-failure
     environment:
       SERVER_PORT: 8080
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
@@ -168,6 +174,7 @@
 
   reserva-service:
     build: ./reserva-service
+    restart: on-failure
     environment:
       SERVER_PORT: 8080
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
@@ -187,6 +194,7 @@
 
   sucursal-service:
     build: ./sucursal-service
+    restart: on-failure
     ports:
       - "${SUCURSAL_SWAGGER_PORT:-0}:8080"
     environment:
