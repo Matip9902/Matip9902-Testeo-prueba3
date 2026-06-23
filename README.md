@@ -1,74 +1,94 @@
-# Bibliotech - Proyecto Semestral Full Stack I
+# Bibliotech - Sistema de Biblioteca con Microservicios
 
-Sistema de gestion bibliotecaria basado en microservicios con Spring Boot, Eureka, Config Server, API Gateway, MySQL y Flyway.
+Bibliotech es un sistema de gestion bibliotecaria desarrollado con microservicios en Spring Boot. El proyecto usa Eureka para descubrimiento de servicios, Config Server para configuracion centralizada, API Gateway como punto de entrada, MySQL como base de datos y Flyway para crear tablas y cargar datos iniciales.
+
+## Tecnologias
+
+- Java 17
+- Spring Boot 4.0.6
+- Spring Cloud 2025.1.1
+- Spring Cloud Gateway
+- Netflix Eureka
+- Spring Cloud Config Server
+- Spring Data JPA
+- Spring Web MVC / WebFlux
+- Spring Cloud OpenFeign
+- MySQL 8.4
+- Flyway
+- Docker y Docker Compose
+- Swagger/OpenAPI en servicios documentados
 
 ## Arquitectura
 
-Punto de entrada unico interno:
-
 ```text
-api-gateway -> puerto interno 62000
+Cliente / Postman / Navegador
+          |
+          v
+   API Gateway :62000
+          |
+          v
+      Eureka Server
+          |
+          v
+Microservicios de negocio
+          |
+          v
+        MySQL
 ```
 
-Servicios de infraestructura:
+El `api-gateway` es la puerta de entrada para consumir las APIs. Los microservicios se registran en `eureka-service` y se comunican internamente dentro de la red de Docker.
+
+## Servicios
+
+| Servicio | Funcion | Puerto interno | Puerto externo |
+| --- | --- | --- | --- |
+| `mysql` | Base de datos MySQL | `3306` | Automatico con `MYSQL_PORT=0` |
+| `eureka-service` | Registro y descubrimiento de servicios | `56231` | Automatico con `EUREKA_PORT=0` |
+| `config-server` | Servidor de configuracion | `57184` | Automatico con `CONFIG_SERVER_PORT=0` |
+| `api-gateway` | Entrada principal a las APIs | `62000` | Automatico con `API_GATEWAY_PORT=0` |
+| `autor-service` | Gestion de autores | `8080` | Automatico con `AUTOR_SWAGGER_PORT=0` |
+| `sucursal-service` | Gestion de sucursales | `8080` | Automatico con `SUCURSAL_SWAGGER_PORT=0` |
+| `cliente-service` | Gestion de clientes | `8080` | Solo interno |
+| `libros-service` | Gestion de libros | `8080` | Solo interno |
+| `prestamos-service` | Gestion de prestamos | `8080` | Solo interno |
+| `multa-service` | Gestion de multas | `8080` | Solo interno |
+| `reserva-service` | Gestion de reservas | `8080` | Solo interno |
+| `empleado-service` | Gestion de empleados | `8080` | Solo interno |
+
+Los servicios marcados como "Solo interno" no muestran puerto externo en Docker Desktop porque no tienen bloque `ports:` en `docker-compose.yml`. Funcionan por dentro y se consumen desde fuera mediante el `api-gateway`.
+
+## Estructura del proyecto
 
 ```text
-eureka-service   -> puerto interno 56231
-config-server    -> puerto interno 57184
-api-gateway      -> puerto interno 62000
+.
+├── api-gateway
+├── autor-service
+├── cliente-service
+├── config-microservicios
+├── config-server
+├── empleado-service
+├── eureka-service
+├── libros-service
+├── multa-service
+├── prestamos-service
+├── reserva-service
+├── sucursal-service
+├── docker-compose.yml
+└── .env.example
 ```
 
-Los puertos externos se asignan automaticamente por Docker para evitar conflictos en otros computadores. Se pueden revisar con `docker compose ps`.
+## Requisitos
 
-Microservicios de negocio con puerto interno `8080` cuando se levantan con Docker Compose:
+- Docker Desktop instalado y en ejecucion.
+- Git instalado.
+- Conexion a internet la primera vez que se construyen las imagenes, para descargar dependencias Maven.
+- No es necesario tener XAMPP ni MySQL local encendido si se usa Docker.
 
-```text
-clientes-service
-autor-service
-libros-service
-prestamos-service
-multas-service
-reserva-service
-sucursal-service
-empleado-service
-```
+## Configuracion de puertos
 
-## Base de Datos y Flyway
+El archivo `.env.example` define puertos externos en `0`:
 
-Cada microservicio usa MySQL y tiene su propia base de datos. Las URLs usan `createDatabaseIfNotExist=true`, por lo que MySQL crea la base automaticamente al iniciar el servicio. Flyway crea las tablas y carga 15 registros iniciales por base.
-
-```text
-bd_clientes_bibliotech
-bd_autores_bibliotech
-bd_libros_bibliotech
-bd_prestamos_bibliotech
-bd_multas_bibliotech
-bd_reservas_bibliotech
-bd_sucursales_bibliotech
-bd_empleados_bibliotech
-```
-
-Importante: si ya habias ejecutado migraciones anteriores, elimina esas bases desde phpMyAdmin antes de probar esta version. Flyway guarda historial y puede rechazar cambios si una migracion vieja ya fue aplicada.
-
-## Despliegue con Docker
-
-El proyecto incluye un `Dockerfile` por cada microservicio y un archivo `docker-compose.yml` en la raiz para levantar todo el ecosistema.
-
-### Requisitos
-
-```text
-Docker Desktop instalado y en ejecucion
-Git instalado
-Puertos disponibles o configurados mediante .env
-```
-
-No es necesario tener XAMPP o MySQL local encendido, porque Docker Compose levanta su propio contenedor MySQL.
-
-### Configurar puertos
-
-El proyecto incluye el archivo `.env.example` con los puertos publicos usados por Docker. Por defecto estan en `0`, lo que significa que Docker elegira un puerto libre automaticamente:
-
-```text
+```env
 MYSQL_PORT=0
 EUREKA_PORT=0
 CONFIG_SERVER_PORT=0
@@ -77,66 +97,241 @@ AUTOR_SWAGGER_PORT=0
 SUCURSAL_SWAGGER_PORT=0
 ```
 
-Para usarlo, copia el archivo como `.env`:
+El valor `0` significa que Docker elegira automaticamente un puerto libre de tu computador. Esto evita conflictos cuando otro programa ya esta usando un puerto.
 
-```bash
+Para usar estos valores:
+
+```powershell
 copy .env.example .env
 ```
 
-En Git Bash tambien puedes usar:
+Tambien puedes dejar que Docker use los valores por defecto definidos en `docker-compose.yml`.
 
-```bash
-cp .env.example .env
+Si quieres un puerto fijo, cambia el valor en `.env`. Ejemplo:
+
+```env
+API_GATEWAY_PORT=62000
+EUREKA_PORT=56231
 ```
 
-Si quieres usar un puerto fijo, modifica el valor correspondiente en `.env`. Por ejemplo:
+## Levantar el proyecto con Docker
 
-```text
-API_GATEWAY_PORT=62001
-```
+Desde la raiz del proyecto:
 
-Si lo dejas en `0`, Docker asignara un puerto libre y deberas consultarlo con:
-
-```bash
-docker compose ps
-```
-
-### Levantar el proyecto
-
-Desde la carpeta raiz del proyecto ejecuta:
-
-```text
+```powershell
 docker compose up --build
 ```
 
-Este comando construye las imagenes y levanta:
+Para levantarlo en segundo plano:
 
-```text
-mysql
-eureka-service
-config-server
-api-gateway
-autor-service
-cliente-service
-empleado-service
-libros-service
-multa-service
-prestamos-service
-reserva-service
-sucursal-service
+```powershell
+docker compose up --build -d
 ```
 
-### Verificar el despliegue
+Para ver los contenedores y los puertos asignados:
 
-Abre Eureka:
-
-```text
-http://localhost:PUERTO_EUREKA
+```powershell
+docker compose ps
 ```
 
-El valor de `PUERTO_EUREKA` se obtiene con `docker compose ps`. Busca la fila de `eureka-service` y revisa el puerto publicado hacia `56231/tcp`.
+Ejemplo de salida esperada:
 
-En Eureka deben aparecer registrados los servicios:
+```text
+api-gateway      32780:62000
+eureka-service   32775:56231
+config-server    32777:57184
+autor-service    32779:8080
+sucursal-service 32778:8080
+```
+
+En este ejemplo, el gateway se consume desde:
+
+```text
+http://localhost:32780
+```
+
+## Consumir APIs desde el API Gateway
+
+Usa siempre el puerto externo del `api-gateway`. Si Docker muestra:
+
+```text
+api-gateway 32780:62000
+```
+
+entonces las rutas principales son:
+
+```text
+GET http://localhost:32780/api/v1/autores
+GET http://localhost:32780/api/v1/clientes
+GET http://localhost:32780/api/v1/libros
+GET http://localhost:32780/api/v1/prestamos
+GET http://localhost:32780/api/v1/multas
+GET http://localhost:32780/api/v1/reservas
+GET http://localhost:32780/api/v1/sucursales
+GET http://localhost:32780/api/v1/empleados
+```
+
+La regla general es:
+
+```text
+http://localhost:PUERTO_GATEWAY/ruta-del-servicio
+```
+
+No necesitas usar los puertos internos de cada microservicio para consumir la API desde Postman o navegador.
+
+## Rutas configuradas en el Gateway
+
+| Ruta | Servicio destino |
+| --- | --- |
+| `/api/v1/autores/**` | `AUTOR-SERVICE` |
+| `/api/v1/clientes/**` | `CLIENTES-SERVICE` |
+| `/api/v1/libros/**` | `LIBROS-SERVICE` |
+| `/api/v1/prestamos/**` | `PRESTAMOS-SERVICE` |
+| `/api/v1/multas/**` | `MULTAS-SERVICE` |
+| `/api/v1/reservas/**` | `RESERVA-SERVICE` |
+| `/api/v1/sucursales/**` | `SUCURSAL-SERVICE` |
+| `/api/v1/empleados/**` | `EMPLEADO-SERVICE` |
+
+## Endpoints principales
+
+### Autores
+
+Base: `/api/v1/autores`
+
+- `GET /api/v1/autores`
+- `GET /api/v1/autores/{id}`
+- `POST /api/v1/autores`
+- `PUT /api/v1/autores/{id}`
+- `DELETE /api/v1/autores/{id}`
+- `GET /api/v1/autores/buscar`
+- `GET /api/v1/autores/nacionalidad`
+- `GET /api/v1/autores/apellido`
+- `GET /api/v1/autores/total`
+
+### Clientes
+
+Base: `/api/v1/clientes`
+
+- `GET /api/v1/clientes`
+- `GET /api/v1/clientes/{id}`
+- `POST /api/v1/clientes`
+- `PUT /api/v1/clientes/{id}`
+- `DELETE /api/v1/clientes/{id}`
+- `GET /api/v1/clientes/buscar`
+- `GET /api/v1/clientes/email`
+- `GET /api/v1/clientes/dominio-email`
+- `GET /api/v1/clientes/total`
+
+### Libros
+
+Base: `/api/v1/libros`
+
+- `GET /api/v1/libros`
+- `GET /api/v1/libros/{id}`
+- `POST /api/v1/libros`
+- `DELETE /api/v1/libros/{id}`
+- `GET /api/v1/libros/buscar`
+- `GET /api/v1/libros/disponibles`
+- `GET /api/v1/libros/autor/{idAutor}`
+- `GET /api/v1/libros/sin-stock`
+- `GET /api/v1/libros/bajo-stock`
+- `GET /api/v1/libros/total`
+
+### Prestamos
+
+Base: `/api/v1/prestamos`
+
+- `GET /api/v1/prestamos`
+- `GET /api/v1/prestamos/{id}`
+- `POST /api/v1/prestamos`
+- `PUT /api/v1/prestamos/{id}`
+- `DELETE /api/v1/prestamos/{id}`
+- `GET /api/v1/prestamos/activos`
+- `GET /api/v1/prestamos/cliente/{idCliente}`
+- `GET /api/v1/prestamos/libro/{idLibro}`
+- `GET /api/v1/prestamos/atrasados`
+
+### Multas
+
+Base: `/api/v1/multas`
+
+- `GET /api/v1/multas`
+- `GET /api/v1/multas/{id}`
+- `POST /api/v1/multas`
+- `POST /api/v1/multas/generar/{idPrestamo}`
+- `PUT /api/v1/multas/pagar/{id}`
+- `GET /api/v1/multas/cliente/{idCliente}`
+- `GET /api/v1/multas/pendientes`
+- `GET /api/v1/multas/pagadas`
+- `GET /api/v1/multas/total-pendiente`
+- `GET /api/v1/multas/generadas`
+
+### Reservas
+
+Base: `/api/v1/reservas`
+
+- `GET /api/v1/reservas`
+- `GET /api/v1/reservas/{id}`
+- `POST /api/v1/reservas`
+- `PUT /api/v1/reservas/{id}`
+- `DELETE /api/v1/reservas/{id}`
+- `GET /api/v1/reservas/cliente/{idCliente}`
+- `GET /api/v1/reservas/libro/{idLibro}`
+- `GET /api/v1/reservas/estado`
+- `GET /api/v1/reservas/activas`
+- `GET /api/v1/reservas/fechas`
+
+### Sucursales
+
+Base: `/api/v1/sucursales`
+
+- `GET /api/v1/sucursales`
+- `GET /api/v1/sucursales/{id}`
+- `POST /api/v1/sucursales`
+- `PUT /api/v1/sucursales/{id}`
+- `DELETE /api/v1/sucursales/{id}`
+- `GET /api/v1/sucursales/buscar`
+- `GET /api/v1/sucursales/con-empleados`
+- `GET /api/v1/sucursales/sin-empleados`
+- `GET /api/v1/sucursales/dotacion-hasta`
+- `GET /api/v1/sucursales/total`
+
+### Empleados
+
+Base: `/api/v1/empleados`
+
+- `GET /api/v1/empleados`
+- `GET /api/v1/empleados/{id}`
+- `POST /api/v1/empleados`
+- `PUT /api/v1/empleados/{id}`
+- `DELETE /api/v1/empleados/{id}`
+- `GET /api/v1/empleados/sucursal/{idSucursal}`
+- `GET /api/v1/empleados/cargo`
+- `GET /api/v1/empleados/edad-desde`
+- `GET /api/v1/empleados/dominio-email`
+- `GET /api/v1/empleados/total`
+
+## Eureka
+
+Para abrir Eureka, revisa el puerto publicado:
+
+```powershell
+docker compose ps
+```
+
+Si aparece:
+
+```text
+eureka-service 32775:56231
+```
+
+abre:
+
+```text
+http://localhost:32775
+```
+
+En Eureka deberian aparecer registrados:
 
 ```text
 API-GATEWAY
@@ -150,19 +345,145 @@ RESERVA-SERVICE
 SUCURSAL-SERVICE
 ```
 
-El mensaje rojo de Eureka sobre renovaciones puede aparecer al inicio y es normal en ambiente local mientras los servicios terminan de renovar su estado.
+## Swagger
 
-### Probar el API Gateway
-
-El punto de entrada principal es:
+Los servicios con Swagger publicado directamente son:
 
 ```text
-http://localhost:PUERTO_GATEWAY
+autor-service
+sucursal-service
 ```
 
-El valor de `PUERTO_GATEWAY` se obtiene con `docker compose ps`. Busca la fila de `api-gateway` y revisa el puerto publicado hacia `62000/tcp`.
+Primero revisa los puertos:
 
-Ejemplos:
+```powershell
+docker compose ps
+```
+
+Luego abre:
+
+```text
+http://localhost:PUERTO_AUTOR/swagger-ui/index.html
+http://localhost:PUERTO_SUCURSAL/swagger-ui/index.html
+```
+
+Ejemplo:
+
+```text
+http://localhost:32779/swagger-ui/index.html
+```
+
+## Base de datos
+
+Cada microservicio usa su propia base de datos dentro del contenedor MySQL:
+
+| Servicio | Base de datos |
+| --- | --- |
+| `autor-service` | `bd_autores_bibliotech` |
+| `cliente-service` | `bd_clientes_bibliotech` |
+| `libros-service` | `bd_libros_bibliotech` |
+| `prestamos-service` | `bd_prestamos_bibliotech` |
+| `multa-service` | `bd_multas_bibliotech` |
+| `reserva-service` | `bd_reservas_bibliotech` |
+| `sucursal-service` | `bd_sucursales_bibliotech` |
+| `empleado-service` | `bd_empleados_bibliotech` |
+
+Las URLs usan `createDatabaseIfNotExist=true`, por lo que MySQL crea cada base automaticamente al iniciar el servicio.
+
+Flyway ejecuta migraciones `V1__create_*.sql` y `V2__insert_*.sql`. En general, cada servicio carga 15 registros iniciales.
+
+## Ver logs
+
+Ver todos los logs:
+
+```powershell
+docker compose logs -f
+```
+
+Ver logs de un servicio:
+
+```powershell
+docker compose logs -f api-gateway
+docker compose logs -f eureka-service
+docker compose logs -f autor-service
+```
+
+## Apagar el proyecto
+
+Detener contenedores:
+
+```powershell
+docker compose down
+```
+
+Detener y borrar datos de MySQL:
+
+```powershell
+docker compose down --volumes
+```
+
+Usa `--volumes` cuando quieras que Flyway vuelva a crear las bases desde cero.
+
+## Problemas comunes
+
+### Algunos servicios no muestran puerto en Docker Desktop
+
+Es normal. Servicios como `cliente-service`, `libros-service`, `prestamos-service`, `multa-service`, `reserva-service` y `empleado-service` no publican puerto externo. Se consumen mediante el `api-gateway`.
+
+### El gateway no responde
+
+Revisa el puerto externo real:
+
+```powershell
+docker compose ps
+```
+
+Luego usa:
+
+```text
+http://localhost:PUERTO_GATEWAY/api/v1/autores
+```
+
+### Eureka no muestra todos los servicios al instante
+
+Es normal que algunos tarden unos segundos. Espera a que MySQL este saludable y a que los microservicios terminen de iniciar.
+
+### Flyway falla por migraciones antiguas
+
+Si ya habias levantado una version anterior, puede quedar historial de Flyway. Para reiniciar las bases:
+
+```powershell
+docker compose down --volumes
+docker compose up --build
+```
+
+### Quiero usar XAMPP en vez de Docker
+
+Se puede usar XAMPP solo para MySQL, pero no reemplaza a los microservicios. Tendrias que levantar cada proyecto Spring Boot manualmente con Java/Maven, cambiar las URLs de base de datos de `mysql:3306` a `localhost:3306` y asignar puertos distintos a cada servicio, porque fuera de Docker no pueden compartir el mismo puerto `8080`.
+
+Para este proyecto, Docker Compose es la forma recomendada.
+
+## Flujo rapido de prueba
+
+1. Levantar todo:
+
+```powershell
+docker compose up --build -d
+```
+
+2. Ver puertos:
+
+```powershell
+docker compose ps
+```
+
+3. Abrir Eureka:
+
+```text
+http://localhost:PUERTO_EUREKA
+```
+
+4. Probar el gateway:
 
 ```text
 http://localhost:PUERTO_GATEWAY/api/v1/autores
@@ -170,95 +491,8 @@ http://localhost:PUERTO_GATEWAY/api/v1/clientes
 http://localhost:PUERTO_GATEWAY/api/v1/libros
 ```
 
-### Probar Swagger
+5. Apagar:
 
-Swagger esta expuesto en los microservicios documentados:
-
-```text
-http://localhost:PUERTO_AUTOR_SWAGGER/swagger-ui/index.html
-http://localhost:PUERTO_SUCURSAL_SWAGGER/swagger-ui/index.html
-```
-
-Estos puertos tambien se revisan con `docker compose ps`, buscando `autor-service` y `sucursal-service`, ambos publicados hacia `8080/tcp`.
-
-Desde Swagger se puede abrir un endpoint, presionar `Try it out` y luego `Execute` para probar la API.
-
-### Revisar Flyway
-
-Para revisar que Flyway ejecuto las migraciones, puedes ver los logs de un microservicio:
-
-```bash
-docker compose logs autor-service
-```
-
-En los logs deben aparecer mensajes como:
-
-```text
-Successfully validated 2 migrations
-Current version of schema
-Schema is up to date
-```
-
-Tambien se puede entrar a MySQL y revisar la tabla de historial:
-
-```bash
-docker compose exec mysql mysql -uroot
-```
-
-Luego:
-
-```sql
-USE bd_autores_bibliotech;
-SELECT * FROM flyway_schema_history;
-```
-
-### Apagar el proyecto
-
-Para detener los contenedores:
-
-```bash
+```powershell
 docker compose down
 ```
-
-Para detenerlos y borrar tambien los datos de MySQL:
-
-```bash
-docker compose down --volumes
-```
-
-Usa `--volumes` solo cuando quieras que Flyway vuelva a crear las bases y cargar los datos desde cero.
-
-## Endpoints GET
-
-Todos se consumen por el Gateway:
-
-```text
-GET http://localhost:62000/api/v1/autores
-GET http://localhost:62000/api/v1/clientes
-GET http://localhost:62000/api/v1/libros
-GET http://localhost:62000/api/v1/prestamos
-GET http://localhost:62000/api/v1/multas
-GET http://localhost:62000/api/v1/reservas
-GET http://localhost:62000/api/v1/sucursales
-GET http://localhost:62000/api/v1/empleados
-```
-
-## Prueba Rapida
-
-1. Abre Eureka:
-
-```text
-http://localhost:56231
-```
-
-2. Verifica que aparezcan los servicios registrados.
-
-3. Prueba:
-
-```text
-GET http://localhost:62000/api/v1/autores
-GET http://localhost:62000/api/v1/clientes
-GET http://localhost:62000/api/v1/libros
-```
-
-Cada tabla deberia traer 15 registros cargados por Flyway.
