@@ -29,7 +29,7 @@
     build: ./config-server
     container_name: config-server
     environment:
-      SERVER_PORT: 58080
+      SERVER_PORT: 57184
       CONFIG_SEARCH_LOCATIONS: file:/config-microservicios
     volumes:
       - ./config-microservicios:/config-microservicios:ro
