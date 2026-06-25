@@ -9,6 +9,43 @@ El proyecto esta preparado para ejecutarse con Docker Compose. Las peticiones ex
 - Matias Imil
 - Giovanni Orellana: [Hikarifire](https://github.com/Hikarifire)
 
+## Prueba rapida
+
+Desde la carpeta raiz del proyecto:
+
+```bash
+docker compose down
+docker compose up --build
+```
+
+En otra terminal, revisar que los contenedores esten levantados:
+
+```bash
+docker ps
+```
+
+Abrir en el navegador:
+
+```text
+http://localhost:9090
+http://localhost:9090/swagger-ui/index.html
+http://localhost:9090/api/v1/autores
+```
+
+Si Swagger muestra `Fetch error` justo despues de iniciar Docker, esperar unos segundos y recargar la pagina. El Gateway puede quedar disponible antes de que todos los microservicios terminen de registrarse en Eureka.
+
+Para ver Eureka, usar el puerto que aparezca en `docker ps` en la fila `eureka-service`. Ejemplo:
+
+```text
+0.0.0.0:32768->56231/tcp
+```
+
+En ese caso se abre:
+
+```text
+http://localhost:32768
+```
+
 ## Tecnologias
 
 - Java 17
@@ -60,7 +97,7 @@ El API Gateway concentra las rutas publicas y la documentacion Swagger. Eureka p
 
 ## Rutas principales
 
-Todas las APIs se consumen desde el Gateway:
+Todas las APIs se consumen desde el Gateway. `localhost:9090` es la entrada principal y redirige a Swagger:
 
 ```text
 http://localhost:9090
@@ -76,6 +113,13 @@ http://localhost:9090
 | `/api/v1/prestamos` | `prestamos-service` |
 | `/api/v1/multas` | `multa-service` |
 | `/api/v1/reservas` | `reserva-service` |
+
+## Accesos utiles
+
+| Recurso | URL |
+| --- | --- |
+| Swagger centralizado | `http://localhost:9090/swagger-ui/index.html` |
+| Eureka Dashboard | Revisar el puerto asignado con `docker ps` en la fila `eureka-service` |
 
 ## Swagger
 

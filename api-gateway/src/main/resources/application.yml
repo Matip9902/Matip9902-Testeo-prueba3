@@ -10,6 +10,12 @@ spring:
               enabled: true
               lower-case-service-id: true
           routes:
+            - id: swagger-home
+              uri: no://op
+              predicates:
+                - Path=/
+              filters:
+                - RedirectTo=302,/swagger-ui/index.html
             - id: clientes-service
               uri: lb://CLIENTES-SERVICE
               predicates:
