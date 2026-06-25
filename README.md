@@ -230,28 +230,6 @@ Las APIs documentadas tienen pruebas en capa de servicio y controlador.
 | `cliente-service` | `ClienteServiceTest`, `ClienteControllerTest` |
 | `libros-service` | `LibroServiceTest`, `LibroControllerTest` |
 
-Ejecucion por servicio:
-
-```powershell
-cd autor-service
-mvn test
-```
-
-```powershell
-cd sucursal-service
-mvn test
-```
-
-```powershell
-cd cliente-service
-mvn test
-```
-
-```powershell
-cd libros-service
-mvn test
-```
-
 ## Verificacion rapida
 
 Con Docker levantado, se pueden probar estos casos desde Swagger o Postman:
