@@ -1,6 +1,13 @@
-# Bibliotech - Microservicios
+# Bibliotech - Microservicios Spring Boot
 
-Bibliotech es un sistema de gestion de biblioteca desarrollado con Spring Boot y arquitectura de microservicios. El proyecto se levanta con Docker Compose y usa API Gateway, Eureka, Config Server, MySQL, Flyway, Feign y Swagger/OpenAPI.
+Bibliotech es un sistema de gestion de biblioteca desarrollado con arquitectura de microservicios. Permite administrar autores, libros, clientes, sucursales, empleados, prestamos, multas y reservas.
+
+El proyecto esta preparado para ejecutarse con Docker Compose. Las peticiones externas entran por el API Gateway en `localhost:9090`; los microservicios trabajan dentro de la red interna con puertos dinamicos.
+
+## Integrantes
+
+- Matias Imil
+- Giovanni Orellana: [Hikarifire](https://github.com/Hikarifire)
 
 ## Tecnologias
 
@@ -20,38 +27,99 @@ Bibliotech es un sistema de gestion de biblioteca desarrollado con Spring Boot y
 ## Arquitectura
 
 ```text
-Usuario / Swagger / Postman
-        |
-        v
- API Gateway :9090
-        |
-        v
- Microservicios
-        |
-        v
-      MySQL
+Cliente / Swagger / Postman
+          |
+          v
+API Gateway localhost:9090
+          |
+          v
+Eureka + microservicios internos
+          |
+          v
+MySQL + Flyway
 ```
 
-El API Gateway es la entrada principal del sistema. Los microservicios se registran en Eureka y se comunican dentro de la red Docker.
+El API Gateway concentra las rutas publicas y la documentacion Swagger. Eureka permite que los servicios se registren y sean ubicados por nombre dentro del ecosistema.
 
-## Servicios
+## Microservicios
 
-| Servicio | Funcion |
+| Servicio | Responsabilidad |
 | --- | --- |
-| `api-gateway` | Entrada principal y Swagger centralizado |
+| `api-gateway` | Entrada principal, rutas y Swagger centralizado |
 | `eureka-service` | Registro y descubrimiento de servicios |
 | `config-server` | Configuracion centralizada |
 | `autor-service` | Gestion de autores |
-| `libros-service` | Gestion de libros |
+| `libros-service` | Gestion de libros y consulta de autores |
 | `cliente-service` | Gestion de clientes |
 | `sucursal-service` | Gestion de sucursales |
+| `empleado-service` | Gestion de empleados |
 | `prestamos-service` | Gestion de prestamos |
 | `multa-service` | Gestion de multas |
 | `reserva-service` | Gestion de reservas |
-| `empleado-service` | Gestion de empleados |
-| `mysql` | Base de datos |
+| `mysql` | Base de datos relacional |
 
-## Levantar el proyecto
+## Rutas principales
+
+Todas las APIs se consumen desde el Gateway:
+
+```text
+http://localhost:9090
+```
+
+| Ruta | Servicio |
+| --- | --- |
+| `/api/v1/autores` | `autor-service` |
+| `/api/v1/libros` | `libros-service` |
+| `/api/v1/clientes` | `cliente-service` |
+| `/api/v1/sucursales` | `sucursal-service` |
+| `/api/v1/empleados` | `empleado-service` |
+| `/api/v1/prestamos` | `prestamos-service` |
+| `/api/v1/multas` | `multa-service` |
+| `/api/v1/reservas` | `reserva-service` |
+
+## Swagger
+
+La documentacion se revisa desde el API Gateway:
+
+```text
+http://localhost:9090/swagger-ui/index.html
+```
+
+Servicios documentados en Swagger:
+
+| Documentacion | API Docs |
+| --- | --- |
+| Autor Service | `http://localhost:9090/autor-service/v3/api-docs` |
+| Sucursal Service | `http://localhost:9090/sucursal-service/v3/api-docs` |
+| Cliente Service | `http://localhost:9090/clientes-service/v3/api-docs` |
+| Libros Service | `http://localhost:9090/libros-service/v3/api-docs` |
+
+Las documentaciones incluyen parametros, codigos HTTP, ejemplos JSON y responsable en la cabecera OpenAPI.
+
+## Base de datos
+
+MySQL se inicializa con el script ubicado en:
+
+```text
+init-db/01-create-databases.sql
+```
+
+Cada microservicio aplica sus migraciones con Flyway desde:
+
+```text
+src/main/resources/db/migration
+```
+
+La configuracion JPA trabaja con validacion del esquema:
+
+```yml
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+```
+
+## Despliegue con Docker
 
 Desde la raiz del proyecto:
 
@@ -59,183 +127,98 @@ Desde la raiz del proyecto:
 docker compose up --build
 ```
 
-En segundo plano:
+Para ejecutar en segundo plano:
 
 ```powershell
 docker compose up --build -d
 ```
 
-Detener:
+Para detener:
 
 ```powershell
 docker compose down
 ```
 
-Reiniciar tambien la base de datos:
+Para reiniciar tambien la base de datos:
 
 ```powershell
 docker compose down --volumes
 docker compose up --build
 ```
 
-## Puertos importantes
-
-El API Gateway queda fijo en:
+Despues de iniciar, el sistema se consume desde:
 
 ```text
 http://localhost:9090
 ```
 
-El puerto interno del Gateway es `62000`, pero desde el navegador se usa `9090`.
+Si el puerto `9090` esta ocupado en el equipo, se puede cambiar el puerto externo del Gateway en el archivo `.env`:
 
-Eureka puede tener puerto dinamico segun Docker. Para verlo:
-
-```powershell
-docker ps
+```env
+API_GATEWAY_PORT=9091
 ```
 
-## API Gateway
+Luego se reinicia Docker Compose y el acceso quedaria en `http://localhost:9091`.
 
-Rutas principales por Gateway:
+## Ejecucion local
 
-| Ruta | Servicio |
+El proyecto tambien puede levantarse de forma local usando una base MySQL instalada en el equipo, por ejemplo con XAMPP.
+
+Pasos generales:
+
+1. Levantar MySQL.
+2. Ejecutar el script `create_databases_xampp.sql`.
+3. Iniciar `eureka-service`.
+4. Iniciar `config-server`.
+5. Iniciar `api-gateway`.
+6. Iniciar los microservicios necesarios.
+
+Los archivos de configuracion estan en formato `.yml`. Los microservicios de negocio usan puertos dinamicos mediante `server.port=0`.
+
+## Pruebas
+
+Las APIs documentadas tienen pruebas en capa de servicio y controlador.
+
+| Servicio | Pruebas |
 | --- | --- |
-| `http://localhost:9090/api/v1/autores` | `autor-service` |
-| `http://localhost:9090/api/v1/libros` | `libros-service` |
-| `http://localhost:9090/api/v1/clientes` | `cliente-service` |
-| `http://localhost:9090/api/v1/sucursales` | `sucursal-service` |
-| `http://localhost:9090/api/v1/prestamos` | `prestamos-service` |
-| `http://localhost:9090/api/v1/multas` | `multa-service` |
-| `http://localhost:9090/api/v1/reservas` | `reserva-service` |
-| `http://localhost:9090/api/v1/empleados` | `empleado-service` |
+| `autor-service` | `AutorServiceTest`, `AutorControllerTest` |
+| `sucursal-service` | `SucursalServiceTest`, `SucursalControllerTest` |
+| `cliente-service` | `ClienteServiceTest`, `ClienteControllerTest` |
+| `libros-service` | `LibroServiceTest`, `LibroControllerTest` |
 
-## Swagger centralizado
-
-La documentacion Swagger se abre desde el API Gateway:
-
-```text
-http://localhost:9090/swagger-ui/index.html
-```
-
-APIs documentadas:
-
-- `Autor Service`
-- `Sucursal Service`
-- `Cliente Service`
-- `Libros Service`
-
-Esto cumple la indicacion de tener 4 documentaciones, 2 por integrante. Cada API documentada incluye operaciones, parametros, codigos HTTP y ejemplos JSON.
-
-Endpoints internos usados por Swagger:
-
-```text
-http://localhost:9090/autor-service/v3/api-docs
-http://localhost:9090/sucursal-service/v3/api-docs
-http://localhost:9090/clientes-service/v3/api-docs
-http://localhost:9090/libros-service/v3/api-docs
-```
-
-## Pruebas rapidas para defensa
-
-Probar desde Swagger o navegador:
-
-| Caso | URL | Resultado esperado |
-| --- | --- | --- |
-| Autor existente | `GET http://localhost:9090/api/v1/autores/1` | `200 OK` |
-| Autor con ID invalido | `GET http://localhost:9090/api/v1/autores/0` | `400 Bad Request` |
-| Autor inexistente | `GET http://localhost:9090/api/v1/autores/99999` | `404 Not Found` |
-| Sucursal existente | `GET http://localhost:9090/api/v1/sucursales/1` | `200 OK` |
-| Sucursal con ID invalido | `GET http://localhost:9090/api/v1/sucursales/0` | `400 Bad Request` |
-| Cliente con ID invalido | `GET http://localhost:9090/api/v1/clientes/0` | `400 Bad Request` |
-| Libro con ID invalido | `GET http://localhost:9090/api/v1/libros/0` | `400 Bad Request` |
-
-Tambien se puede probar que Swagger este centralizado abriendo las 4 definiciones `/v3/api-docs` desde el puerto `9090`.
-
-## Testing
-
-Las APIs documentadas tienen pruebas en capa `service` y en capa `controller`.
-
-| Servicio | Service test | Controller test |
-| --- | --- | --- |
-| `autor-service` | `AutorServiceTest` | `AutorControllerTest` |
-| `sucursal-service` | `SucursalServiceTest` | `SucursalControllerTest` |
-| `cliente-service` | `ClienteServiceTest` | `ClienteControllerTest` |
-| `libros-service` | `LibroServiceTest` | `LibroControllerTest` |
-
-Los tests de controller usan `MockMvcBuilders.standaloneSetup`, Mockito y validaciones, sin `@WebMvcTest`.
-
-Ejecutar tests:
+Ejecucion por servicio:
 
 ```powershell
 cd autor-service
 mvn test
+```
 
-cd ../sucursal-service
-mvn test
-
-cd ../cliente-service
-mvn test
-
-cd ../libros-service
+```powershell
+cd sucursal-service
 mvn test
 ```
 
-## Flyway
-
-Flyway ejecuta scripts SQL versionados al levantar los servicios. Esto permite crear tablas y cargar datos iniciales automaticamente.
-
-Ejemplo:
-
-```text
-V1__create_tables.sql
-V2__insert_data.sql
+```powershell
+cd cliente-service
+mvn test
 ```
-
-Si se eliminan los volumenes de Docker, Flyway vuelve a preparar la base al iniciar.
-
-## Feign
-
-OpenFeign permite comunicacion entre microservicios sin escribir llamadas HTTP manuales. Por ejemplo, `libros-service` puede consultar informacion de autores mediante `autor-service`.
-
-Esto demuestra interoperabilidad entre servicios usando nombres registrados en Eureka.
-
-## Puntos clave para explicar
-
-- Docker Compose levanta MySQL, Eureka, Config Server, Gateway y microservicios.
-- Eureka registra servicios para que puedan encontrarse por nombre.
-- El API Gateway centraliza la entrada por `localhost:9090`.
-- Swagger se abre desde el Gateway y muestra las 4 APIs documentadas.
-- Flyway prepara la base de datos automaticamente.
-- Feign permite llamadas entre microservicios.
-- Los tests validan comportamiento de service y controller.
-
-## Problemas comunes
-
-### Swagger demora en cargar
-
-Puede tardar entre 30 y 90 segundos despues de levantar Docker, porque los servicios deben iniciar, conectarse a MySQL y registrarse.
-
-### Swagger muestra 503
-
-Revisar que el microservicio este levantado:
 
 ```powershell
-docker ps
+cd libros-service
+mvn test
 ```
 
-Tambien revisar logs:
+## Verificacion rapida
 
-```powershell
-docker compose logs nombre-del-servicio
-```
+Con Docker levantado, se pueden probar estos casos desde Swagger o Postman:
 
-### Un servicio no muestra puerto externo
+| Caso | URL | Esperado |
+| --- | --- | --- |
+| Buscar autor existente | `GET http://localhost:9090/api/v1/autores/1` | `200 OK` |
+| Buscar autor inexistente | `GET http://localhost:9090/api/v1/autores/99999` | `404 Not Found` |
+| Buscar autor con id invalido | `GET http://localhost:9090/api/v1/autores/0` | `400 Bad Request` |
+| Buscar sucursal existente | `GET http://localhost:9090/api/v1/sucursales/1` | `200 OK` |
+| Buscar cliente con id invalido | `GET http://localhost:9090/api/v1/clientes/0` | `400 Bad Request` |
+| Buscar libro con id invalido | `GET http://localhost:9090/api/v1/libros/0` | `400 Bad Request` |
 
-No siempre es problema. Algunos servicios quedan solo dentro de Docker y se consumen desde el Gateway.
-
-### Datos antiguos en MySQL
-
-```powershell
-docker compose down --volumes
-docker compose up --build
-```
+Swagger y Eureka pueden tardar unos segundos en mostrar todos los servicios despues de iniciar los contenedores.

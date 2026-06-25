@@ -1,9 +1,10 @@
-package cl.duoc.sucursal_service.service;
+package cl.duoc.sucursal_service;
 
 import cl.duoc.sucursal_service.dto.SucursalDTO;
 import cl.duoc.sucursal_service.mapper.SucursalMapper;
 import cl.duoc.sucursal_service.model.Sucursal;
 import cl.duoc.sucursal_service.repository.SucursalRepository;
+import cl.duoc.sucursal_service.service.SucursalService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +18,9 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -91,6 +95,75 @@ class SucursalServiceTest {
         );
 
         assertTrue(error.getMessage().contains("empleados"));
+    }
+
+    @Test
+    void updateDebeActualizarSucursalCuandoExiste() {
+        Sucursal datosActualizados = new Sucursal(null, "Providencia", "Av. Nueva 123", 12);
+        Sucursal sucursalActualizada = new Sucursal(1L, "Providencia", "Av. Nueva 123", 12);
+        SucursalDTO dtoActualizado = new SucursalDTO();
+        dtoActualizado.setId(1L);
+        dtoActualizado.setComuna("Providencia");
+        dtoActualizado.setDireccion("Av. Nueva 123");
+        dtoActualizado.setCantidadEmpleados(12);
+
+        when(sucursalRepository.findById(1L)).thenReturn(Optional.of(sucursal));
+        when(sucursalRepository.save(sucursal)).thenReturn(sucursalActualizada);
+        when(sucursalMapper.toDTO(sucursalActualizada)).thenReturn(dtoActualizado);
+
+        SucursalDTO resultado = sucursalService.update(1L, datosActualizados);
+
+        assertEquals("Providencia", resultado.getComuna());
+        assertEquals(12, resultado.getCantidadEmpleados());
+        verify(sucursalRepository).findById(1L);
+        verify(sucursalRepository).save(sucursal);
+    }
+
+    @Test
+    void updateDebeLanzarErrorCuandoNoExiste() {
+        when(sucursalRepository.findById(99L)).thenReturn(Optional.empty());
+
+        RuntimeException error = assertThrows(
+                RuntimeException.class,
+                () -> sucursalService.update(99L, sucursal)
+        );
+
+        assertTrue(error.getMessage().contains("no encontrada"));
+        verify(sucursalRepository, never()).save(any(Sucursal.class));
+    }
+
+    @Test
+    void updateDebeValidarIdInvalido() {
+        IllegalArgumentException error = assertThrows(
+                IllegalArgumentException.class,
+                () -> sucursalService.update(0L, sucursal)
+        );
+
+        assertTrue(error.getMessage().contains("positivo"));
+        verify(sucursalRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    void deleteDebeEliminarSucursalCuandoExiste() {
+        when(sucursalRepository.existsById(1L)).thenReturn(true);
+
+        sucursalService.delete(1L);
+
+        verify(sucursalRepository).existsById(1L);
+        verify(sucursalRepository).deleteById(1L);
+    }
+
+    @Test
+    void deleteDebeLanzarErrorCuandoNoExiste() {
+        when(sucursalRepository.existsById(99L)).thenReturn(false);
+
+        RuntimeException error = assertThrows(
+                RuntimeException.class,
+                () -> sucursalService.delete(99L)
+        );
+
+        assertTrue(error.getMessage().contains("no encontrada"));
+        verify(sucursalRepository, never()).deleteById(anyLong());
     }
 
     @Test

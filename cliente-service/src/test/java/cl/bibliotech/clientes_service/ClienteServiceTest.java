@@ -1,9 +1,10 @@
-package cl.bibliotech.clientes_service.service;
+package cl.bibliotech.clientes_service;
 
 import cl.bibliotech.clientes_service.dto.ClienteDTO;
 import cl.bibliotech.clientes_service.mapper.ClienteMapper;
 import cl.bibliotech.clientes_service.model.Cliente;
 import cl.bibliotech.clientes_service.repository.ClienteRepository;
+import cl.bibliotech.clientes_service.service.ClienteService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -82,9 +82,25 @@ class ClienteServiceTest {
     }
 
     @Test
+    void saveDebeValidarNombreObligatorio() {
+        cliente.setNombre("");
+
+        IllegalArgumentException error = assertThrows(
+                IllegalArgumentException.class,
+                () -> clienteService.save(cliente)
+        );
+
+        assertTrue(error.getMessage().contains("nombre"));
+        verify(clienteRepository, never()).save(any(Cliente.class));
+    }
+
+    @Test
     void deleteDebeLlamarAlRepositorio() {
+        when(clienteRepository.existsById(1L)).thenReturn(true);
+
         clienteService.delete(1L);
 
+        verify(clienteRepository).existsById(1L);
         verify(clienteRepository).deleteById(1L);
     }
 
@@ -104,12 +120,26 @@ class ClienteServiceTest {
     }
 
     @Test
-    void updateDebeRetornarNullCuandoNoExiste() {
+    void updateDebeValidarIdInvalido() {
+        IllegalArgumentException error = assertThrows(
+                IllegalArgumentException.class,
+                () -> clienteService.update(0L, cliente)
+        );
+
+        assertTrue(error.getMessage().contains("positivo"));
+        verify(clienteRepository, never()).findById(anyLong());
+    }
+
+    @Test
+    void updateDebeLanzarErrorCuandoNoExiste() {
         when(clienteRepository.findById(99L)).thenReturn(Optional.empty());
 
-        Cliente resultado = clienteService.update(99L, cliente);
+        RuntimeException error = assertThrows(
+                RuntimeException.class,
+                () -> clienteService.update(99L, cliente)
+        );
 
-        assertNull(resultado);
+        assertTrue(error.getMessage().contains("no encontrado"));
         verify(clienteRepository, never()).save(any(Cliente.class));
     }
 

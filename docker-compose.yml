@@ -8,6 +8,7 @@ services:
       - "${MYSQL_PORT:-0}:3306"
     volumes:
       - bibliotech-mysql-data:/var/lib/mysql
+      - ./init-db:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -41,10 +42,8 @@ services:
   autor-service:
     build: ./autor-service
     restart: on-failure
-    ports:
-      - "${AUTOR_SWAGGER_PORT:-0}:8080"
     environment:
-      SERVER_PORT: 8080
+      SERVER_PORT: 0
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
       EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
       EUREKA_CLIENT_FETCH_REGISTRY: "true"
@@ -63,10 +62,8 @@ services:
   cliente-service:
     build: ./cliente-service
     restart: on-failure
-    ports:
-      - "${CLIENTE_SWAGGER_PORT:-0}:8080"
     environment:
-      SERVER_PORT: 8080
+      SERVER_PORT: 0
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
       EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
       EUREKA_CLIENT_FETCH_REGISTRY: "true"
@@ -86,7 +83,7 @@ services:
     build: ./empleado-service
     restart: on-failure
     environment:
-      SERVER_PORT: 8080
+      SERVER_PORT: 0
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
       EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
       EUREKA_CLIENT_FETCH_REGISTRY: "true"
@@ -107,10 +104,8 @@ services:
   libros-service:
     build: ./libros-service
     restart: on-failure
-    ports:
-      - "${LIBROS_SWAGGER_PORT:-0}:8080"
     environment:
-      SERVER_PORT: 8080
+      SERVER_PORT: 0
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
       EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
       EUREKA_CLIENT_FETCH_REGISTRY: "true"
@@ -132,7 +127,7 @@ services:
     build: ./multa-service
     restart: on-failure
     environment:
-      SERVER_PORT: 8080
+      SERVER_PORT: 0
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
       EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
       EUREKA_CLIENT_FETCH_REGISTRY: "true"
@@ -156,7 +151,7 @@ services:
     build: ./prestamos-service
     restart: on-failure
     environment:
-      SERVER_PORT: 8080
+      SERVER_PORT: 0
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
       EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
       EUREKA_CLIENT_FETCH_REGISTRY: "true"
@@ -180,7 +175,7 @@ services:
     build: ./reserva-service
     restart: on-failure
     environment:
-      SERVER_PORT: 8080
+      SERVER_PORT: 0
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
       EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
       EUREKA_CLIENT_FETCH_REGISTRY: "true"
@@ -199,10 +194,8 @@ services:
   sucursal-service:
     build: ./sucursal-service
     restart: on-failure
-    ports:
-      - "${SUCURSAL_SWAGGER_PORT:-0}:8080"
     environment:
-      SERVER_PORT: 8080
+      SERVER_PORT: 0
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
       EUREKA_CLIENT_REGISTER_WITH_EUREKA: "true"
       EUREKA_CLIENT_FETCH_REGISTRY: "true"

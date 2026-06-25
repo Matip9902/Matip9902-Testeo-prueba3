@@ -32,6 +32,7 @@ public class ClienteService {
     }
 
     public Cliente save(Cliente cliente) {
+        validarCliente(cliente);
         return clienteRepository.save(cliente);
     }
 
@@ -45,6 +46,7 @@ public class ClienteService {
 
     public Cliente update(Long id, Cliente cliente) {
         validarId(id);
+        validarCliente(cliente);
         Cliente clienteUpdate = clienteRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cliente con ID " + id + " no encontrado."));
         clienteUpdate.setNombre(cliente.getNombre());
@@ -90,6 +92,21 @@ public class ClienteService {
     private void validarId(Long id) {
         if (id == null || id <= 0) {
             throw new IllegalArgumentException("El ID debe ser un numero positivo.");
+        }
+    }
+
+    private void validarCliente(Cliente cliente) {
+        if (cliente == null) {
+            throw new IllegalArgumentException("El cliente no puede ser nulo.");
+        }
+        if (cliente.getNombre() == null || cliente.getNombre().isBlank()) {
+            throw new IllegalArgumentException("El nombre es obligatorio.");
+        }
+        if (cliente.getEmail() == null || cliente.getEmail().isBlank()) {
+            throw new IllegalArgumentException("El email es obligatorio.");
+        }
+        if (cliente.getPassword() == null || cliente.getPassword().isBlank()) {
+            throw new IllegalArgumentException("La password es obligatoria.");
         }
     }
 }

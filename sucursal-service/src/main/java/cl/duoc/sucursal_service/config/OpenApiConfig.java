@@ -1,6 +1,7 @@
 package cl.duoc.sucursal_service.config;
 
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
@@ -17,14 +18,12 @@ public class OpenApiConfig {
                 .servers(List.of(
                         new Server()
                                 .url("http://localhost:9090")
-                                .description("API Gateway centralizado"),
-                        new Server()
-                                .url("http://localhost:8080")
-                                .description("Servicio directo en ejecucion local")
+                                .description("API Gateway centralizado")
                 ))
                 .info(new Info()
                         .title("Sucursal Service API")
                         .version("1.0")
+                        .contact(new Contact().name("Matias Imil"))
                         .description("Documentacion de endpoints para gestionar sucursales de Bibliotech. Ruta por Gateway: http://localhost:9090/api/v1/sucursales"));
     }
 }

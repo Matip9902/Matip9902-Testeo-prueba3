@@ -1,4 +1,4 @@
-﻿spring:
+spring:
   application:
     name: clientes-service
   datasource:
@@ -24,7 +24,7 @@
     swagger-ui:
       enabled: true
 server:
-  port: ${SERVER_PORT:8080}
+  port: ${SERVER_PORT:0}
 
 eureka:
   client:

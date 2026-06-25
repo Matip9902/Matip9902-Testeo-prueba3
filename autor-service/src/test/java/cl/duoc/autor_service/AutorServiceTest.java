@@ -1,10 +1,11 @@
-package cl.duoc.autor_service.service;
+package cl.duoc.autor_service;
 
 import cl.duoc.autor_service.dto.AutorDTO;
 import cl.duoc.autor_service.exception.AutorNotFoundException;
 import cl.duoc.autor_service.mapper.AutorMapper;
 import cl.duoc.autor_service.model.Autor;
 import cl.duoc.autor_service.repository.AutorRepository;
+import cl.duoc.autor_service.service.AutorService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

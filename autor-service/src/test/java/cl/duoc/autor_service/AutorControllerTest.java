@@ -1,4 +1,4 @@
-package cl.duoc.autor_service.testing;
+package cl.duoc.autor_service;
 
 import cl.duoc.autor_service.controller.AutorController;
 import cl.duoc.autor_service.dto.AutorDTO;

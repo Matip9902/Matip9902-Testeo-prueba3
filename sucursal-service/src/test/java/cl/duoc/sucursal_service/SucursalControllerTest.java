@@ -1,4 +1,4 @@
-package cl.duoc.sucursal_service.testing;
+package cl.duoc.sucursal_service;
 
 import cl.duoc.sucursal_service.controller.SucursalController;
 import cl.duoc.sucursal_service.dto.SucursalDTO;
@@ -20,9 +20,14 @@ import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -71,7 +76,7 @@ class SucursalControllerTest {
 
     @Test
     void buscarPorIdDebeRetornarBadRequestConIdInvalido() throws Exception {
-        when(sucursalService.findById(0L)).thenThrow(new IllegalArgumentException("El ID debe ser un numero positivo."));
+        lenient().when(sucursalService.findById(0L)).thenThrow(new IllegalArgumentException("El ID debe ser un numero positivo."));
 
         mockMvc.perform(get("/api/v1/sucursales/{id}", 0L))
                 .andExpect(status().isBadRequest())
@@ -107,5 +112,74 @@ class SucursalControllerTest {
                                 }
                                 """))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void actualizarDebeRetornarOk() throws Exception {
+        when(sucursalService.update(anyLong(), any(Sucursal.class))).thenReturn(sucursalDTO);
+
+        mockMvc.perform(put("/api/v1/sucursales/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "comuna": "Santiago",
+                                  "direccion": "Av. Libertador 1234",
+                                  "cantidadEmpleados": 5
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.comuna").value("Santiago"));
+    }
+
+    @Test
+    void actualizarDebeRetornarBadRequestConIdInvalido() throws Exception {
+        lenient().when(sucursalService.update(anyLong(), any(Sucursal.class)))
+                .thenThrow(new IllegalArgumentException("El ID debe ser un numero positivo."));
+
+        mockMvc.perform(put("/api/v1/sucursales/{id}", 0L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "comuna": "Santiago",
+                                  "direccion": "Av. Libertador 1234",
+                                  "cantidadEmpleados": 5
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @Test
+    void actualizarDebeRetornarNotFoundCuandoNoExiste() throws Exception {
+        when(sucursalService.update(anyLong(), any(Sucursal.class)))
+                .thenThrow(new RuntimeException("Sucursal con ID 99 no encontrada."));
+
+        mockMvc.perform(put("/api/v1/sucursales/{id}", 99L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "comuna": "Santiago",
+                                  "direccion": "Av. Libertador 1234",
+                                  "cantidadEmpleados": 5
+                                }
+                                """))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    void eliminarDebeRetornarNoContent() throws Exception {
+        mockMvc.perform(delete("/api/v1/sucursales/{id}", 1L))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void eliminarDebeRetornarNotFoundCuandoNoExiste() throws Exception {
+        doThrow(new RuntimeException("Sucursal con ID 99 no encontrada."))
+                .when(sucursalService).delete(99L);
+
+        mockMvc.perform(delete("/api/v1/sucursales/{id}", 99L))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
     }
 }

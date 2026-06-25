@@ -48,6 +48,22 @@ public class SucursalService {
     }
 
     public SucursalDTO update(Long id, Sucursal sucursal) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("El ID debe ser un numero positivo.");
+        }
+        if (sucursal == null) {
+            throw new IllegalArgumentException("La sucursal no puede ser nula.");
+        }
+        if (sucursal.getComuna() == null || sucursal.getComuna().isBlank()) {
+            throw new IllegalArgumentException("La comuna es obligatoria.");
+        }
+        if (sucursal.getDireccion() == null || sucursal.getDireccion().isBlank()) {
+            throw new IllegalArgumentException("La direccion es obligatoria.");
+        }
+        if (sucursal.getCantidadEmpleados() == null || sucursal.getCantidadEmpleados() < 0) {
+            throw new IllegalArgumentException("La cantidad de empleados debe ser mayor o igual a 0.");
+        }
+
         Sucursal sucursalExistente = sucursalRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sucursal con ID " + id + " no encontrada."));
         sucursalExistente.setComuna(sucursal.getComuna());

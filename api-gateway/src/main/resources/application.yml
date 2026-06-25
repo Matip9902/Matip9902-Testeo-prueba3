@@ -44,27 +44,27 @@ spring:
                 - Path=/api/v1/reservas/**
 
             # Swagger centralizado por API Gateway.
-            # Estas rutas usan DNS interno de Docker para evitar errores de Eureka al cargar /v3/api-docs.
+            # Se enruta por Eureka para soportar microservicios con server.port=0.
             - id: autor-service-docs
-              uri: http://autor-service:8080
+              uri: lb://AUTOR-SERVICE
               predicates:
                 - Path=/autor-service/v3/api-docs
               filters:
                 - RewritePath=/autor-service/v3/api-docs,/v3/api-docs
             - id: sucursal-service-docs
-              uri: http://sucursal-service:8080
+              uri: lb://SUCURSAL-SERVICE
               predicates:
                 - Path=/sucursal-service/v3/api-docs
               filters:
                 - RewritePath=/sucursal-service/v3/api-docs,/v3/api-docs
             - id: clientes-service-docs
-              uri: http://cliente-service:8080
+              uri: lb://CLIENTES-SERVICE
               predicates:
                 - Path=/clientes-service/v3/api-docs
               filters:
                 - RewritePath=/clientes-service/v3/api-docs,/v3/api-docs
             - id: libros-service-docs
-              uri: http://libros-service:8080
+              uri: lb://LIBROS-SERVICE
               predicates:
                 - Path=/libros-service/v3/api-docs
               filters:
