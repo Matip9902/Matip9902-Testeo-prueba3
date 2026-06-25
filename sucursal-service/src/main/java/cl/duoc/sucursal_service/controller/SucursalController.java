@@ -12,13 +12,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 // Documentacion Swagger trabajada por Matias imil.
+@Validated
 @RestController
 @RequestMapping("/api/v1/sucursales")
 @Tag(name = "Sucursales", description = "Operaciones para crear, consultar, actualizar y eliminar sucursales.")
@@ -62,11 +67,12 @@ public class SucursalController {
                                       "cantidadEmpleados": 5
                                     }
                                     """))),
+            @ApiResponse(responseCode = "400", description = "Parametro invalido", content = @Content),
             @ApiResponse(responseCode = "404", description = "Sucursal no encontrada", content = @Content)
     })
     public ResponseEntity<SucursalDTO> buscarPorId(
             @Parameter(description = "ID de la sucursal a consultar.", example = "1", required = true)
-            @PathVariable Long id) {
+            @PathVariable @Positive(message = "El ID debe ser positivo.") Long id) {
         return ResponseEntity.ok(sucursalService.findById(id));
     }
 
@@ -109,12 +115,12 @@ public class SucursalController {
             @ApiResponse(responseCode = "200", description = "Sucursal actualizada correctamente",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = SucursalDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Datos invalidos para actualizar la sucursal", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Datos invalidos o parametro invalido", content = @Content),
             @ApiResponse(responseCode = "404", description = "Sucursal no encontrada", content = @Content)
     })
     public ResponseEntity<SucursalDTO> actualizar(
             @Parameter(description = "ID de la sucursal a actualizar.", example = "1", required = true)
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "El ID debe ser positivo.") Long id,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Nuevos datos de la sucursal.",
                     required = true,
@@ -135,11 +141,12 @@ public class SucursalController {
     @Operation(summary = "Eliminar sucursal", description = "Elimina una sucursal registrada por su identificador.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Sucursal eliminada correctamente", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Parametro invalido", content = @Content),
             @ApiResponse(responseCode = "404", description = "Sucursal no encontrada", content = @Content)
     })
     public ResponseEntity<Void> eliminar(
             @Parameter(description = "ID de la sucursal a eliminar.", example = "1", required = true)
-            @PathVariable Long id) {
+            @PathVariable @Positive(message = "El ID debe ser positivo.") Long id) {
         sucursalService.delete(id);
         return ResponseEntity.noContent().build();
     }
@@ -149,11 +156,12 @@ public class SucursalController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Busqueda realizada correctamente",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = SucursalDTO.class)))
+                            schema = @Schema(implementation = SucursalDTO.class))),
+            @ApiResponse(responseCode = "400", description = "Parametro comuna invalido", content = @Content)
     })
     public ResponseEntity<List<SucursalDTO>> buscarPorComuna(
             @Parameter(description = "Comuna usada como filtro.", example = "Santiago", required = true)
-            @RequestParam String comuna) {
+            @RequestParam @NotBlank(message = "La comuna no puede estar vacia.") String comuna) {
         return ResponseEntity.ok(sucursalService.findByComuna(comuna));
     }
 
@@ -189,7 +197,7 @@ public class SucursalController {
     })
     public ResponseEntity<List<SucursalDTO>> listarPorDotacionMaxima(
             @Parameter(description = "Cantidad maxima de empleados permitida.", example = "10", required = true)
-            @RequestParam Integer maximo) {
+            @RequestParam @PositiveOrZero(message = "El maximo debe ser mayor o igual a cero.") Integer maximo) {
         return ResponseEntity.ok(sucursalService.findConDotacionHasta(maximo));
     }
 

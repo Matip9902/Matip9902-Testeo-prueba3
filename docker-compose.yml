@@ -1,4 +1,4 @@
-﻿services:
+services:
   mysql:
     image: mysql:8.0.36
     container_name: bibliotech-mysql
@@ -225,7 +225,7 @@
       SERVER_PORT: 62000
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
     ports:
-      - "${API_GATEWAY_PORT:-0}:62000"
+      - "${API_GATEWAY_PORT:-9090}:62000"
     depends_on:
       - eureka-service
       - config-server

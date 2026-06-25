@@ -1,4 +1,4 @@
-﻿spring:
+spring:
   application:
     name: api-gateway
   cloud:
@@ -42,6 +42,46 @@
               uri: lb://RESERVA-SERVICE
               predicates:
                 - Path=/api/v1/reservas/**
+
+            # Swagger centralizado por API Gateway.
+            # Estas rutas usan DNS interno de Docker para evitar errores de Eureka al cargar /v3/api-docs.
+            - id: autor-service-docs
+              uri: http://autor-service:8080
+              predicates:
+                - Path=/autor-service/v3/api-docs
+              filters:
+                - RewritePath=/autor-service/v3/api-docs,/v3/api-docs
+            - id: sucursal-service-docs
+              uri: http://sucursal-service:8080
+              predicates:
+                - Path=/sucursal-service/v3/api-docs
+              filters:
+                - RewritePath=/sucursal-service/v3/api-docs,/v3/api-docs
+            - id: clientes-service-docs
+              uri: http://cliente-service:8080
+              predicates:
+                - Path=/clientes-service/v3/api-docs
+              filters:
+                - RewritePath=/clientes-service/v3/api-docs,/v3/api-docs
+            - id: libros-service-docs
+              uri: http://libros-service:8080
+              predicates:
+                - Path=/libros-service/v3/api-docs
+              filters:
+                - RewritePath=/libros-service/v3/api-docs,/v3/api-docs
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: Autor Service
+        url: /autor-service/v3/api-docs
+      - name: Sucursal Service
+        url: /sucursal-service/v3/api-docs
+      - name: Cliente Service
+        url: /clientes-service/v3/api-docs
+      - name: Libros Service
+        url: /libros-service/v3/api-docs
 
 server:
   port: ${SERVER_PORT:62000}

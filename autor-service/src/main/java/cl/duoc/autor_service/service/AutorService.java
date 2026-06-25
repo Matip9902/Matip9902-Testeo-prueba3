@@ -1,7 +1,7 @@
 package cl.duoc.autor_service.service;
 
-
 import cl.duoc.autor_service.dto.AutorDTO;
+import cl.duoc.autor_service.exception.AutorNotFoundException;
 import cl.duoc.autor_service.mapper.AutorMapper;
 import cl.duoc.autor_service.model.Autor;
 import cl.duoc.autor_service.repository.AutorRepository;
@@ -15,6 +15,7 @@ public class AutorService {
 
     @Autowired
     private AutorRepository autorRepository;
+
     @Autowired
     private AutorMapper autorMapper;
 
@@ -24,11 +25,9 @@ public class AutorService {
     }
 
     public AutorDTO findById(Long id) {
-        if (id == null || id <= 0) {
-            throw new IllegalArgumentException("El ID debe ser un número positivo.");
-        }
+        validarId(id);
         Autor autor = autorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Autor con ID " + id + " no encontrado."));
+                .orElseThrow(() -> new AutorNotFoundException(id));
         return autorMapper.toDTO(autor);
     }
 
@@ -46,8 +45,9 @@ public class AutorService {
     }
 
     public AutorDTO update(Long id, Autor autor) {
+        validarId(id);
         Autor autorExistente = autorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Autor con ID " + id + " no encontrado."));
+                .orElseThrow(() -> new AutorNotFoundException(id));
         autorExistente.setNombre(autor.getNombre());
         autorExistente.setApellido(autor.getApellido());
         autorExistente.setNacionalidad(autor.getNacionalidad());
@@ -55,15 +55,16 @@ public class AutorService {
     }
 
     public void delete(Long id) {
+        validarId(id);
         if (!autorRepository.existsById(id)) {
-            throw new RuntimeException("Autor con ID " + id + " no encontrado.");
+            throw new AutorNotFoundException(id);
         }
         autorRepository.deleteById(id);
     }
 
     public List<AutorDTO> findByNombre(String nombre) {
         if (nombre == null || nombre.isBlank()) {
-            throw new IllegalArgumentException("El nombre de búsqueda no puede estar vacío.");
+            throw new IllegalArgumentException("El nombre de busqueda no puede estar vacio.");
         }
         List<Autor> autores = autorRepository.findByNombreContainingIgnoreCase(nombre);
         return autores.stream().map(autorMapper::toDTO).toList();
@@ -71,12 +72,11 @@ public class AutorService {
 
     public List<AutorDTO> findByNacionalidad(String nacionalidad) {
         if (nacionalidad == null || nacionalidad.isBlank()) {
-            throw new IllegalArgumentException("La nacionalidad no puede estar vacía.");
+            throw new IllegalArgumentException("La nacionalidad no puede estar vacia.");
         }
         List<Autor> autores = autorRepository.findByNacionalidad(nacionalidad);
         return autores.stream().map(autorMapper::toDTO).toList();
     }
-
 
     public List<AutorDTO> findByApellido(String apellido) {
         if (apellido == null || apellido.isBlank()) {
@@ -88,5 +88,11 @@ public class AutorService {
 
     public Long count() {
         return autorRepository.count();
+    }
+
+    private void validarId(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("El ID debe ser un numero positivo.");
+        }
     }
 }

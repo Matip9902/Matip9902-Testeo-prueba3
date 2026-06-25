@@ -1,6 +1,7 @@
 package cl.duoc.autor_service.service;
 
 import cl.duoc.autor_service.dto.AutorDTO;
+import cl.duoc.autor_service.exception.AutorNotFoundException;
 import cl.duoc.autor_service.mapper.AutorMapper;
 import cl.duoc.autor_service.model.Autor;
 import cl.duoc.autor_service.repository.AutorRepository;
@@ -71,6 +72,19 @@ class AutorServiceTest {
     }
 
     @Test
+    void findByIdDebeLanzarNotFoundCuandoNoExiste() {
+        when(autorRepository.findById(99L)).thenReturn(Optional.empty());
+
+        AutorNotFoundException error = assertThrows(
+                AutorNotFoundException.class,
+                () -> autorService.findById(99L)
+        );
+
+        assertTrue(error.getMessage().contains("99"));
+        verify(autorRepository).findById(99L);
+    }
+
+    @Test
     void findByIdDebeLanzarErrorConIdInvalido() {
         IllegalArgumentException error = assertThrows(
                 IllegalArgumentException.class,
@@ -101,5 +115,15 @@ class AutorServiceTest {
         );
 
         assertTrue(error.getMessage().contains("nombre"));
+    }
+
+    @Test
+    void deleteDebeEliminarAutorCuandoExiste() {
+        when(autorRepository.existsById(1L)).thenReturn(true);
+
+        autorService.delete(1L);
+
+        verify(autorRepository).existsById(1L);
+        verify(autorRepository).deleteById(1L);
     }
 }

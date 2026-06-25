@@ -25,7 +25,9 @@ public class ClienteService {
     }
 
     public ClienteDTO findById(Long id) {
-        Cliente cliente = clienteRepository.findById(id).orElse(null);
+        validarId(id);
+        Cliente cliente = clienteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cliente con ID " + id + " no encontrado."));
         return mapper.toDTO(cliente);
     }
 
@@ -34,12 +36,17 @@ public class ClienteService {
     }
 
     public void delete(Long id) {
+        validarId(id);
+        if (!clienteRepository.existsById(id)) {
+            throw new RuntimeException("Cliente con ID " + id + " no encontrado.");
+        }
         clienteRepository.deleteById(id);
     }
 
     public Cliente update(Long id, Cliente cliente) {
-        Cliente clienteUpdate = clienteRepository.findById(id).orElse(null);
-        if (clienteUpdate == null) return null;
+        validarId(id);
+        Cliente clienteUpdate = clienteRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cliente con ID " + id + " no encontrado."));
         clienteUpdate.setNombre(cliente.getNombre());
         clienteUpdate.setEmail(cliente.getEmail());
         clienteUpdate.setPassword(cliente.getPassword());
@@ -79,5 +86,10 @@ public class ClienteService {
 
     public Long count() {
         return clienteRepository.count();
+    }
+    private void validarId(Long id) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("El ID debe ser un numero positivo.");
+        }
     }
 }
