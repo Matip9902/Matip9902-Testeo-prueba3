@@ -1,4 +1,4 @@
-package cl.duoc.libros_service.service;
+package cl.duoc.libros_service;
 
 import cl.duoc.libros_service.client.AutorClient;
 import cl.duoc.libros_service.dto.AutorDTO;
@@ -6,6 +6,7 @@ import cl.duoc.libros_service.dto.LibroDTO;
 import cl.duoc.libros_service.mapper.LibroMapper;
 import cl.duoc.libros_service.model.Libro;
 import cl.duoc.libros_service.repository.LibroRepository;
+import cl.duoc.libros_service.service.LibroService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -123,7 +124,39 @@ class LibroServiceTest {
                 () -> libroService.save(libro)
         );
 
-        assertTrue(error.getMessage().contains("título es obligatorio"));
+        assertTrue(error.getMessage().contains("titulo es obligatorio"));
+        verify(libroRepository, never()).save(any(Libro.class));
+    }
+
+    @Test
+    void updateDebeActualizarLibroCuandoExiste() {
+        Libro datosActualizados = new Libro(null, "Cien anos de soledad", 100L, 8L);
+        Libro libroActualizado = new Libro(1L, "Cien anos de soledad", 100L, 8L);
+        LibroDTO dtoActualizado = new LibroDTO(1L, "Cien anos de soledad", autorDTO, 8L);
+
+        when(libroRepository.findById(1L)).thenReturn(Optional.of(libro));
+        when(libroRepository.save(libro)).thenReturn(libroActualizado);
+        when(autorClient.buscarPorId(100L)).thenReturn(autorDTO);
+        when(libroMapper.toDTO(libroActualizado, autorDTO)).thenReturn(dtoActualizado);
+
+        LibroDTO resultado = libroService.update(1L, datosActualizados);
+
+        assertEquals("Cien anos de soledad", resultado.getTitulo());
+        assertEquals(8L, resultado.getStock());
+        verify(libroRepository).findById(1L);
+        verify(libroRepository).save(libro);
+    }
+
+    @Test
+    void updateDebeLanzarErrorCuandoNoExiste() {
+        when(libroRepository.findById(99L)).thenReturn(Optional.empty());
+
+        RuntimeException error = assertThrows(
+                RuntimeException.class,
+                () -> libroService.update(99L, libro)
+        );
+
+        assertTrue(error.getMessage().contains("no encontrado"));
         verify(libroRepository, never()).save(any(Libro.class));
     }
 

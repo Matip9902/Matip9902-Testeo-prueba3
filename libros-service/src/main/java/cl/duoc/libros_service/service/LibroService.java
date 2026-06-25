@@ -31,7 +31,7 @@ public class LibroService {
 
     public LibroDTO findById(Long id) {
         if (id == null || id <= 0) {
-            throw new IllegalArgumentException("El ID debe ser un número positivo.");
+            throw new IllegalArgumentException("El ID debe ser un numero positivo.");
         }
         Libro libro = libroRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Libro con ID " + id + " no encontrado."));
@@ -44,7 +44,7 @@ public class LibroService {
             throw new IllegalArgumentException("El libro no puede ser nulo.");
         }
         if (libro.getTitulo() == null || libro.getTitulo().isBlank()) {
-            throw new IllegalArgumentException("El título es obligatorio.");
+            throw new IllegalArgumentException("El titulo es obligatorio.");
         }
         if (libro.getIdAutor() == null) {
             throw new IllegalArgumentException("El autor es obligatorio.");
@@ -54,9 +54,34 @@ public class LibroService {
         return libroMapper.toDTO(libroGuardado, autor);
     }
 
+    public LibroDTO update(Long id, Libro libro) {
+        if (id == null || id <= 0) {
+            throw new IllegalArgumentException("El ID debe ser un numero positivo.");
+        }
+        if (libro == null) {
+            throw new IllegalArgumentException("El libro no puede ser nulo.");
+        }
+        if (libro.getTitulo() == null || libro.getTitulo().isBlank()) {
+            throw new IllegalArgumentException("El titulo es obligatorio.");
+        }
+        if (libro.getIdAutor() == null) {
+            throw new IllegalArgumentException("El autor es obligatorio.");
+        }
+
+        Libro libroExistente = libroRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Libro con ID " + id + " no encontrado."));
+        libroExistente.setTitulo(libro.getTitulo());
+        libroExistente.setIdAutor(libro.getIdAutor());
+        libroExistente.setStock(libro.getStock());
+
+        Libro libroActualizado = libroRepository.save(libroExistente);
+        AutorDTO autor = autorClient.buscarPorId(libroActualizado.getIdAutor());
+        return libroMapper.toDTO(libroActualizado, autor);
+    }
+
     public void delete(Long id) {
         if (id == null || id <= 0) {
-            throw new IllegalArgumentException("El ID debe ser un número positivo.");
+            throw new IllegalArgumentException("El ID debe ser un numero positivo.");
         }
         if (!libroRepository.existsById(id)) {
             throw new RuntimeException("Libro con ID " + id + " no encontrado.");
@@ -66,7 +91,7 @@ public class LibroService {
 
     public List<LibroDTO> findByTitulo(String titulo) {
         if (titulo == null || titulo.isBlank()) {
-            throw new IllegalArgumentException("El título no puede estar vacío.");
+            throw new IllegalArgumentException("El titulo no puede estar vacio.");
         }
         List<Libro> libros = libroRepository.findByTituloContainingIgnoreCase(titulo);
         return libros.stream().map(libro -> {

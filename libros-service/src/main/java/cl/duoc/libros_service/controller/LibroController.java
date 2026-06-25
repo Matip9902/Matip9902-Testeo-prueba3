@@ -25,7 +25,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping("/api/v1/libros")
-@Tag(name = "Libros", description = "Operaciones para crear, consultar y eliminar libros.")
+@Tag(name = "Libros", description = "Operaciones para crear, consultar, actualizar y eliminar libros.")
 public class LibroController {
 
     @Autowired
@@ -85,6 +85,46 @@ public class LibroController {
                                     """)))
             @Valid @RequestBody Libro libro) {
         return ResponseEntity.status(201).body(libroService.save(libro));
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Actualizar libro", description = "Actualiza los datos de un libro existente.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Libro actualizado correctamente",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = LibroDTO.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "id": 1,
+                                      "titulo": "Cien anos de soledad",
+                                      "autor": {
+                                        "id": 1,
+                                        "nombre": "Gabriel",
+                                        "apellido": "Garcia Marquez",
+                                        "nacionalidad": "Colombiana"
+                                      },
+                                      "stock": 12
+                                    }
+                                    """))),
+            @ApiResponse(responseCode = "400", description = "Datos invalidos o parametro invalido", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Libro no encontrado", content = @Content)
+    })
+    public ResponseEntity<LibroDTO> actualizar(
+            @Parameter(description = "ID del libro a actualizar.", example = "1", required = true)
+            @PathVariable @Positive(message = "El ID debe ser positivo.") Long id,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    description = "Nuevos datos del libro.",
+                    required = true,
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Libro.class),
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "titulo": "Cien anos de soledad",
+                                      "idAutor": 1,
+                                      "stock": 12
+                                    }
+                                    """)))
+            @Valid @RequestBody Libro libro) {
+        return ResponseEntity.ok(libroService.update(id, libro));
     }
 
     @DeleteMapping("/{id}")

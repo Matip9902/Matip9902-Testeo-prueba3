@@ -1,4 +1,4 @@
-package cl.duoc.libros_service.testing;
+package cl.duoc.libros_service;
 
 import cl.duoc.libros_service.controller.LibroController;
 import cl.duoc.libros_service.dto.AutorDTO;
@@ -21,9 +21,14 @@ import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -69,7 +74,8 @@ class LibroControllerTest {
 
     @Test
     void buscarPorIdDebeRetornarBadRequestConIdInvalido() throws Exception {
-        when(libroService.findById(0L)).thenThrow(new IllegalArgumentException("El ID debe ser un numero positivo."));
+        lenient().when(libroService.findById(0L))
+                .thenThrow(new IllegalArgumentException("El ID debe ser un numero positivo."));
 
         mockMvc.perform(get("/api/v1/libros/{id}", 0L))
                 .andExpect(status().isBadRequest())
@@ -105,5 +111,74 @@ class LibroControllerTest {
                                 }
                                 """))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void actualizarDebeRetornarOk() throws Exception {
+        when(libroService.update(anyLong(), any(Libro.class))).thenReturn(libroDTO);
+
+        mockMvc.perform(put("/api/v1/libros/{id}", 1L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "titulo": "Cien anos de soledad",
+                                  "idAutor": 1,
+                                  "stock": 12
+                                }
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.titulo").value("Cien anos de soledad"));
+    }
+
+    @Test
+    void actualizarDebeRetornarBadRequestConIdInvalido() throws Exception {
+        lenient().when(libroService.update(anyLong(), any(Libro.class)))
+                .thenThrow(new IllegalArgumentException("El ID debe ser un numero positivo."));
+
+        mockMvc.perform(put("/api/v1/libros/{id}", 0L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "titulo": "Cien anos de soledad",
+                                  "idAutor": 1,
+                                  "stock": 12
+                                }
+                                """))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @Test
+    void actualizarDebeRetornarNotFoundCuandoNoExiste() throws Exception {
+        when(libroService.update(anyLong(), any(Libro.class)))
+                .thenThrow(new RuntimeException("Libro con ID 99 no encontrado."));
+
+        mockMvc.perform(put("/api/v1/libros/{id}", 99L)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "titulo": "Cien anos de soledad",
+                                  "idAutor": 1,
+                                  "stock": 12
+                                }
+                                """))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
+    }
+
+    @Test
+    void eliminarDebeRetornarNoContent() throws Exception {
+        mockMvc.perform(delete("/api/v1/libros/{id}", 1L))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void eliminarDebeRetornarNotFoundCuandoNoExiste() throws Exception {
+        doThrow(new RuntimeException("Libro con ID 99 no encontrado."))
+                .when(libroService).delete(99L);
+
+        mockMvc.perform(delete("/api/v1/libros/{id}", 99L))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value(404));
     }
 }
