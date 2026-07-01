@@ -90,7 +90,7 @@ springdoc:
         url: /libros-service/v3/api-docs
 
 server:
-  port: ${SERVER_PORT:62000}
+  port: ${SERVER_PORT:9090}
 
 eureka:
   client:

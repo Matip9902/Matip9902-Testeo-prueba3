@@ -215,10 +215,10 @@ services:
     build: ./api-gateway
     container_name: api-gateway
     environment:
-      SERVER_PORT: 62000
+      SERVER_PORT: 9090
       EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://eureka-service:56231/eureka/
     ports:
-      - "${API_GATEWAY_PORT:-9090}:62000"
+      - "${API_GATEWAY_PORT:-9090}:9090"
     depends_on:
       - eureka-service
       - config-server

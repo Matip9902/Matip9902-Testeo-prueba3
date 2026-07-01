@@ -17,13 +17,13 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .servers(List.of(
                         new Server()
-                                .url("http://localhost:9090")
+                                .url("/")
                                 .description("API Gateway centralizado")
                 ))
                 .info(new Info()
                         .title("Sucursal Service API")
                         .version("1.0")
                         .contact(new Contact().name("Matias Imil"))
-                        .description("Documentacion de endpoints para gestionar sucursales de Bibliotech. Ruta por Gateway: http://localhost:9090/api/v1/sucursales"));
+                        .description("Documentacion de endpoints para gestionar sucursales de Bibliotech. Ruta por Gateway: /api/v1/sucursales"));
     }
 }
