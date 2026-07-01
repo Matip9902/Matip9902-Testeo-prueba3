@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("Testing en la capa conttroller de autor")
+@DisplayName("Pruebas Unitarias - Capa Controller de Autor")
 class AutorControllerTest {
 
     @Mock
@@ -52,8 +52,9 @@ class AutorControllerTest {
         autorDTO.setApellido("Garcia Marquez");
         autorDTO.setNacionalidad("Colombiana");
     }
-    @DisplayName("Debe retornar una lista de autores")
+
     @Test
+    @DisplayName("Debe retornar una lista de autores con estado 200 OK")
     void listarDebeRetornarOk() throws Exception {
         when(autorService.findAll()).thenReturn(List.of(autorDTO));
 
@@ -63,6 +64,7 @@ class AutorControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar los datos del autor y estado 200 OK cuando se busca por un ID existente")
     void buscarPorIdDebeRetornarOk() throws Exception {
         when(autorService.findById(1L)).thenReturn(autorDTO);
 
@@ -72,6 +74,7 @@ class AutorControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 404 Not Found cuando el ID del autor no existe")
     void buscarPorIdDebeRetornarNotFoundCuandoNoExiste() throws Exception {
         when(autorService.findById(99L)).thenThrow(new RuntimeException("Autor con ID 99 no encontrado."));
 
@@ -81,6 +84,7 @@ class AutorControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 400 Bad Request cuando el ID proporcionado es inválido")
     void buscarPorIdDebeRetornarBadRequestConIdInvalido() throws Exception {
         when(autorService.findById(0L)).thenThrow(new IllegalArgumentException("El ID debe ser un numero positivo."));
 
@@ -90,6 +94,7 @@ class AutorControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 201 Created y el objeto creado cuando el body es válido")
     void crearDebeRetornarCreated() throws Exception {
         when(autorService.save(any(Autor.class))).thenReturn(autorDTO);
 
@@ -107,6 +112,7 @@ class AutorControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 400 Bad Request cuando se intenta crear un autor con campos vacíos o inválidos")
     void crearDebeRetornarBadRequestConBodyInvalido() throws Exception {
         mockMvc.perform(post("/api/v1/autores")
                         .contentType(MediaType.APPLICATION_JSON)

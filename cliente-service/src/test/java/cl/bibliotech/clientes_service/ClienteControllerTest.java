@@ -7,6 +7,7 @@ import cl.bibliotech.clientes_service.model.Cliente;
 import cl.bibliotech.clientes_service.service.ClienteService;
 import jakarta.validation.Validation;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -32,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Pruebas Unitarias - Capa Controller de Cliente")
 class ClienteControllerTest {
 
     @Mock
@@ -57,6 +59,7 @@ class ClienteControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar una lista de clientes con estado 200 OK")
     void listarDebeRetornarOk() throws Exception {
         when(clienteService.findAll()).thenReturn(List.of(cliente));
 
@@ -66,6 +69,7 @@ class ClienteControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 404 Not Found cuando el ID del cliente no existe")
     void buscarPorIdDebeRetornarNotFoundCuandoNoExiste() throws Exception {
         when(clienteService.findById(99L)).thenThrow(new RuntimeException("Cliente con ID 99 no encontrado."));
 
@@ -75,6 +79,7 @@ class ClienteControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 400 Bad Request cuando el ID proporcionado para la búsqueda es inválido")
     void buscarPorIdDebeRetornarBadRequestConIdInvalido() throws Exception {
         lenient().when(clienteService.findById(0L))
                 .thenThrow(new IllegalArgumentException("El ID debe ser un numero positivo."));
@@ -85,6 +90,7 @@ class ClienteControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 201 Created y el objeto creado cuando el body para la creación es válido")
     void crearDebeRetornarCreated() throws Exception {
         when(clienteService.save(any(Cliente.class))).thenReturn(cliente);
 
@@ -102,6 +108,7 @@ class ClienteControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 400 Bad Request cuando se intenta crear un cliente con formato de campos o email inválido")
     void crearDebeRetornarBadRequestConBodyInvalido() throws Exception {
         mockMvc.perform(post("/api/v1/clientes")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -116,6 +123,7 @@ class ClienteControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar el cliente modificado y estado 200 OK cuando se actualiza con datos válidos")
     void actualizarDebeRetornarOk() throws Exception {
         when(clienteService.update(anyLong(), any(Cliente.class))).thenReturn(cliente);
 
@@ -133,6 +141,7 @@ class ClienteControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 400 Bad Request cuando el ID proporcionado para actualizar es inválido")
     void actualizarDebeRetornarBadRequestConIdInvalido() throws Exception {
         lenient().when(clienteService.update(anyLong(), any(Cliente.class)))
                 .thenThrow(new IllegalArgumentException("El ID debe ser un numero positivo."));
@@ -151,6 +160,7 @@ class ClienteControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 404 Not Found cuando se intenta actualizar un cliente inexistente")
     void actualizarDebeRetornarNotFoundCuandoNoExiste() throws Exception {
         when(clienteService.update(anyLong(), any(Cliente.class)))
                 .thenThrow(new RuntimeException("Cliente con ID 99 no encontrado."));
@@ -169,12 +179,14 @@ class ClienteControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 204 No Content cuando el cliente se elimina exitosamente")
     void eliminarDebeRetornarNoContent() throws Exception {
         mockMvc.perform(delete("/api/v1/clientes/{id}", 1L))
                 .andExpect(status().isNoContent());
     }
 
     @Test
+    @DisplayName("Debe retornar estado 404 Not Found cuando se intenta eliminar un cliente que no existe")
     void eliminarDebeRetornarNotFoundCuandoNoExiste() throws Exception {
         doThrow(new RuntimeException("Cliente con ID 99 no encontrado."))
                 .when(clienteService).delete(99L);

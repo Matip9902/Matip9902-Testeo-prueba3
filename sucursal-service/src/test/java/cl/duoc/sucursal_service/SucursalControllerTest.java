@@ -7,6 +7,7 @@ import cl.duoc.sucursal_service.model.Sucursal;
 import cl.duoc.sucursal_service.service.SucursalService;
 import jakarta.validation.Validation;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -32,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Pruebas Unitarias - Capa Controller de Sucursal")
 class SucursalControllerTest {
 
     @Mock
@@ -57,6 +59,7 @@ class SucursalControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar una lista de sucursales con estado 200 OK")
     void listarDebeRetornarOk() throws Exception {
         when(sucursalService.findAll()).thenReturn(List.of(sucursalDTO));
 
@@ -66,6 +69,7 @@ class SucursalControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 404 Not Found cuando el ID de la sucursal no existe")
     void buscarPorIdDebeRetornarNotFoundCuandoNoExiste() throws Exception {
         when(sucursalService.findById(99L)).thenThrow(new RuntimeException("Sucursal con ID 99 no encontrada."));
 
@@ -75,6 +79,7 @@ class SucursalControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 400 Bad Request cuando el ID proporcionado para la búsqueda es inválido")
     void buscarPorIdDebeRetornarBadRequestConIdInvalido() throws Exception {
         lenient().when(sucursalService.findById(0L)).thenThrow(new IllegalArgumentException("El ID debe ser un numero positivo."));
 
@@ -84,6 +89,7 @@ class SucursalControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 201 Created y el objeto creado cuando el body para la creación es válido")
     void crearDebeRetornarCreated() throws Exception {
         when(sucursalService.save(any(Sucursal.class))).thenReturn(sucursalDTO);
 
@@ -101,6 +107,7 @@ class SucursalControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 400 Bad Request cuando se intenta crear una sucursal con campos vacíos o fuera de rango")
     void crearDebeRetornarBadRequestConBodyInvalido() throws Exception {
         mockMvc.perform(post("/api/v1/sucursales")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -115,6 +122,7 @@ class SucursalControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar la sucursal modificada y estado 200 OK cuando se actualiza con datos válidos")
     void actualizarDebeRetornarOk() throws Exception {
         when(sucursalService.update(anyLong(), any(Sucursal.class))).thenReturn(sucursalDTO);
 
@@ -132,6 +140,7 @@ class SucursalControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 400 Bad Request cuando el ID proporcionado para actualizar es inválido")
     void actualizarDebeRetornarBadRequestConIdInvalido() throws Exception {
         lenient().when(sucursalService.update(anyLong(), any(Sucursal.class)))
                 .thenThrow(new IllegalArgumentException("El ID debe ser un numero positivo."));
@@ -150,6 +159,7 @@ class SucursalControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 404 Not Found cuando se intenta actualizar una sucursal inexistente")
     void actualizarDebeRetornarNotFoundCuandoNoExiste() throws Exception {
         when(sucursalService.update(anyLong(), any(Sucursal.class)))
                 .thenThrow(new RuntimeException("Sucursal con ID 99 no encontrada."));
@@ -168,12 +178,14 @@ class SucursalControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 204 No Content cuando la sucursal se elimina exitosamente")
     void eliminarDebeRetornarNoContent() throws Exception {
         mockMvc.perform(delete("/api/v1/sucursales/{id}", 1L))
                 .andExpect(status().isNoContent());
     }
 
     @Test
+    @DisplayName("Debe retornar estado 404 Not Found cuando se intenta eliminar una sucursal que no existe")
     void eliminarDebeRetornarNotFoundCuandoNoExiste() throws Exception {
         doThrow(new RuntimeException("Sucursal con ID 99 no encontrada."))
                 .when(sucursalService).delete(99L);

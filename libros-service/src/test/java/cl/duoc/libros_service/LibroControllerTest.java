@@ -8,6 +8,7 @@ import cl.duoc.libros_service.model.Libro;
 import cl.duoc.libros_service.service.LibroService;
 import jakarta.validation.Validation;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -33,6 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Pruebas Unitarias - Capa Controller de Libro")
 class LibroControllerTest {
 
     @Mock
@@ -55,6 +57,7 @@ class LibroControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar una lista de libros con estado 200 OK")
     void listarDebeRetornarOk() throws Exception {
         when(libroService.findAll()).thenReturn(List.of(libroDTO));
 
@@ -64,6 +67,7 @@ class LibroControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 404 Not Found cuando el ID del libro no existe")
     void buscarPorIdDebeRetornarNotFoundCuandoNoExiste() throws Exception {
         when(libroService.findById(99L)).thenThrow(new RuntimeException("Libro con ID 99 no encontrado."));
 
@@ -73,6 +77,7 @@ class LibroControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 400 Bad Request cuando el ID proporcionado para la búsqueda es inválido")
     void buscarPorIdDebeRetornarBadRequestConIdInvalido() throws Exception {
         lenient().when(libroService.findById(0L))
                 .thenThrow(new IllegalArgumentException("El ID debe ser un numero positivo."));
@@ -83,6 +88,7 @@ class LibroControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 201 Created y el objeto creado cuando el body para la creación es válido")
     void crearDebeRetornarCreated() throws Exception {
         when(libroService.save(any(Libro.class))).thenReturn(libroDTO);
 
@@ -100,6 +106,7 @@ class LibroControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 400 Bad Request cuando se intenta crear un libro con campos vacíos o valores fuera de rango")
     void crearDebeRetornarBadRequestConBodyInvalido() throws Exception {
         mockMvc.perform(post("/api/v1/libros")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -114,6 +121,7 @@ class LibroControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar el libro modificado y estado 200 OK cuando se actualiza con datos válidos")
     void actualizarDebeRetornarOk() throws Exception {
         when(libroService.update(anyLong(), any(Libro.class))).thenReturn(libroDTO);
 
@@ -131,6 +139,7 @@ class LibroControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 400 Bad Request cuando el ID proporcionado para actualizar es inválido")
     void actualizarDebeRetornarBadRequestConIdInvalido() throws Exception {
         lenient().when(libroService.update(anyLong(), any(Libro.class)))
                 .thenThrow(new IllegalArgumentException("El ID debe ser un numero positivo."));
@@ -149,6 +158,7 @@ class LibroControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 404 Not Found cuando se intenta actualizar un libro inexistente")
     void actualizarDebeRetornarNotFoundCuandoNoExiste() throws Exception {
         when(libroService.update(anyLong(), any(Libro.class)))
                 .thenThrow(new RuntimeException("Libro con ID 99 no encontrado."));
@@ -167,12 +177,14 @@ class LibroControllerTest {
     }
 
     @Test
+    @DisplayName("Debe retornar estado 204 No Content cuando el libro se elimina exitosamente")
     void eliminarDebeRetornarNoContent() throws Exception {
         mockMvc.perform(delete("/api/v1/libros/{id}", 1L))
                 .andExpect(status().isNoContent());
     }
 
     @Test
+    @DisplayName("Debe retornar estado 404 Not Found cuando se intenta eliminar un libro que no existe")
     void eliminarDebeRetornarNotFoundCuandoNoExiste() throws Exception {
         doThrow(new RuntimeException("Libro con ID 99 no encontrado."))
                 .when(libroService).delete(99L);

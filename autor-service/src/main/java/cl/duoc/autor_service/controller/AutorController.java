@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.PositiveOrZero;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -38,7 +37,7 @@ public class AutorController {
             @ApiResponse(responseCode = "200", description = "Autores obtenidos correctamente",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = AutorDTO.class),
-                            examples = @ExampleObject(value = """
+                            examples = @ExampleObject(name = "Lista de Autores", value = """
                                     [
                                       {
                                         "id": 1,
@@ -59,7 +58,7 @@ public class AutorController {
             @ApiResponse(responseCode = "200", description = "Autor encontrado",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = AutorDTO.class),
-                            examples = @ExampleObject(value = """
+                            examples = @ExampleObject(name = "Detalle del Autor", value = """
                                     {
                                       "id": 1,
                                       "nombre": "Gabriel",
@@ -67,19 +66,26 @@ public class AutorController {
                                       "nacionalidad": "Colombiana"
                                     }
                                     """))),
-            @ApiResponse(responseCode = "400", description = "Parametro invalido", content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = AutorDTO.class),
-                    examples = @ExampleObject(value = """
-                                    [
-                                      {
-                                        "id": 1,
-                                        "nombre": "Gabriel",
-                                        "apellido": "Garcia Marquez",
-                                        "nacionalidad": "Colombiana"
-                                      }
-                                    ]
-                                    """))),
-            @ApiResponse(responseCode = "404", description = "Autor no encontrado", content = @Content)
+            @ApiResponse(responseCode = "400", description = "Parametro invalido",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object"),
+                            examples = @ExampleObject(name = "Error de Validacion de ID", value = """
+                        {
+                          "status": 400,
+                          "error": "Bad Request",
+                          "message": "El ID debe ser positivo."
+                        }
+                        """))),
+            @ApiResponse(responseCode = "404", description = "Autor no encontrado",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object"),
+                            examples = @ExampleObject(name = "Error de Autor no Encontrado", value = """
+                        {
+                          "status": 404,
+                          "error": "Not Found",
+                          "message": "Autor con ID no encontrado."
+                        }
+                        """)))
     })
     public ResponseEntity<AutorDTO> buscarPorId(
             @Parameter(description = "ID del autor a consultar.", example = "1", required = true)
@@ -93,7 +99,7 @@ public class AutorController {
             @ApiResponse(responseCode = "201", description = "Autor creado correctamente",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = AutorDTO.class),
-                            examples = @ExampleObject(value = """
+                            examples = @ExampleObject(name = "Autor Creado", value = """
                                     {
                                       "id": 16,
                                       "nombre": "Gabriel",
@@ -101,7 +107,16 @@ public class AutorController {
                                       "nacionalidad": "Colombiana"
                                     }
                                     """))),
-            @ApiResponse(responseCode = "400", description = "Datos invalidos para crear el autor", content = @Content)
+            @ApiResponse(responseCode = "400", description = "Datos invalidos para crear el autor",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object"),
+                            examples = @ExampleObject(name = "Error de Atributos Vacios", value = """
+                        {
+                          "status": 400,
+                          "error": "Bad Request",
+                          "message": "El nombre no puede estar vacio."
+                        }
+                        """)))
     })
     public ResponseEntity<AutorDTO> crear(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
@@ -109,7 +124,7 @@ public class AutorController {
                     required = true,
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = Autor.class),
-                            examples = @ExampleObject(value = """
+                            examples = @ExampleObject(name = "Estructura para Crear", value = """
                                     {
                                       "nombre": "Gabriel",
                                       "apellido": "Garcia Marquez",
@@ -125,9 +140,35 @@ public class AutorController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Autor actualizado correctamente",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = AutorDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Datos invalidos o parametro invalido", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Autor no encontrado", content = @Content)
+                            schema = @Schema(implementation = AutorDTO.class),
+                            examples = @ExampleObject(name = "Autor Actualizado", value = """
+                                    {
+                                      "id": 1,
+                                      "nombre": "Gabriel",
+                                      "apellido": "Garcia Marquez",
+                                      "nacionalidad": "Colombiana"
+                                    }
+                                    """))),
+            @ApiResponse(responseCode = "400", description = "Datos invalidos o parametro invalido",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object"),
+                            examples = @ExampleObject(name = "Error de Modificacion ID", value = """
+                        {
+                          "status": 400,
+                          "error": "Bad Request",
+                          "message": "El ID debe ser positivo."
+                        }
+                        """))),
+            @ApiResponse(responseCode = "404", description = "Autor no encontrado",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object"),
+                            examples = @ExampleObject(name = "Error de Actualizacion de Autor", value = """
+                                    {
+                                       "status": 404,
+                                       "error": "Not Found",
+                                       "message": "Autor no encontrado."
+                                     }
+                                    """)))
     })
     public ResponseEntity<AutorDTO> actualizar(
             @Parameter(description = "ID del autor a actualizar.", example = "1", required = true)
@@ -137,7 +178,7 @@ public class AutorController {
                     required = true,
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = Autor.class),
-                            examples = @ExampleObject(value = """
+                            examples = @ExampleObject(name = "Estructura para Actualizar", value = """
                                     {
                                       "nombre": "Gabriel",
                                       "apellido": "Garcia Marquez",
@@ -152,8 +193,26 @@ public class AutorController {
     @Operation(summary = "Eliminar autor", description = "Elimina un autor registrado por su identificador.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Autor eliminado correctamente", content = @Content),
-            @ApiResponse(responseCode = "400", description = "Parametro invalido", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Autor no encontrado", content = @Content)
+            @ApiResponse(responseCode = "400", description = "Parametro invalido",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object"),
+                            examples = @ExampleObject(name = "Error ID de Borrado", value = """
+                        {
+                          "status": 400,
+                          "error": "Bad Request",
+                          "message": "El ID debe ser positivo."
+                        }
+                        """))),
+            @ApiResponse(responseCode = "404", description = "Autor no encontrado",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object"),
+                            examples = @ExampleObject(name = "Error Borrado No Encontrado", value = """
+                        {
+                          "status": 404,
+                          "error": "Not Found",
+                          "message": "Autor no encontrado."
+                        }
+                        """)))
     })
     public ResponseEntity<Void> eliminar(
             @Parameter(description = "ID del autor a eliminar.", example = "1", required = true)
@@ -166,8 +225,28 @@ public class AutorController {
     @Operation(summary = "Buscar autores por nombre", description = "Filtra autores cuyo nombre coincida total o parcialmente.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Busqueda realizada correctamente",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = AutorDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Parametro nombre invalido", content = @Content)
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = AutorDTO.class),
+                            examples = @ExampleObject(name = "Resultados por Nombre", value = """
+                                    [
+                                      {
+                                        "id": 1,
+                                        "nombre": "Gabriel",
+                                        "apellido": "Garcia Marquez",
+                                        "nacionalidad": "Colombiana"
+                                      }
+                                    ]
+                                    """))),
+            @ApiResponse(responseCode = "400", description = "Parametro nombre invalido",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object"),
+                            examples = @ExampleObject(name = "Error Busqueda Nombre", value = """
+                        {
+                          "status": 400,
+                          "error": "Bad Request",
+                          "message": "El nombre no puede estar vacio."
+                        }
+                        """)))
     })
     public ResponseEntity<List<AutorDTO>> buscarPorNombre(
             @Parameter(description = "Nombre o parte del nombre a buscar.", example = "Gabriel", required = true)
@@ -179,8 +258,28 @@ public class AutorController {
     @Operation(summary = "Buscar autores por nacionalidad", description = "Retorna autores filtrados por nacionalidad.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Busqueda realizada correctamente",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = AutorDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Parametro nacionalidad invalido", content = @Content)
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = AutorDTO.class),
+                            examples = @ExampleObject(name = "Resultados por Nacionalidad", value = """
+                                    [
+                                      {
+                                        "id": 1,
+                                        "nombre": "Gabriel",
+                                        "apellido": "Garcia Marquez",
+                                        "nacionalidad": "Colombiana"
+                                      }
+                                    ]
+                                    """))),
+            @ApiResponse(responseCode = "400", description = "Parametro nacionalidad invalido",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object"),
+                            examples = @ExampleObject(name = "Error Busqueda Nacionalidad", value = """
+                        {
+                          "status": 400,
+                          "error": "Bad Request",
+                          "message": "La nacionalidad no puede estar vacia."
+                        }
+                        """)))
     })
     public ResponseEntity<List<AutorDTO>> buscarPorNacionalidad(
             @Parameter(description = "Nacionalidad usada como filtro.", example = "Chilena", required = true)
@@ -192,8 +291,28 @@ public class AutorController {
     @Operation(summary = "Buscar autores por apellido", description = "Filtra autores cuyo apellido coincida total o parcialmente.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Busqueda realizada correctamente",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = AutorDTO.class))),
-            @ApiResponse(responseCode = "400", description = "Parametro apellido invalido", content = @Content)
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = AutorDTO.class),
+                            examples = @ExampleObject(name = "Resultados por Apellido", value = """
+                                    [
+                                      {
+                                        "id": 1,
+                                        "nombre": "Gabriel",
+                                        "apellido": "Garcia Marquez",
+                                        "nacionalidad": "Colombiana"
+                                      }
+                                    ]
+                                    """))),
+            @ApiResponse(responseCode = "400", description = "Parametro apellido invalido",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(type = "object"),
+                            examples = @ExampleObject(name = "Error Busqueda Apellido", value = """
+                        {
+                          "status": 400,
+                          "error": "Bad Request",
+                          "message": "El apellido no puede estar vacio."
+                        }
+                        """)))
     })
     public ResponseEntity<List<AutorDTO>> buscarPorApellido(
             @Parameter(description = "Apellido o parte del apellido a buscar.", example = "Garcia", required = true)
@@ -206,7 +325,8 @@ public class AutorController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Total de autores obtenido correctamente",
                     content = @Content(mediaType = "application/json",
-                            examples = @ExampleObject(value = "15")))
+                            schema = @Schema(type = "integer"),
+                            examples = @ExampleObject(name = "Cantidad Total", value = "15")))
     })
     public ResponseEntity<Long> contarAutores() {
         return ResponseEntity.ok(autorService.count());
