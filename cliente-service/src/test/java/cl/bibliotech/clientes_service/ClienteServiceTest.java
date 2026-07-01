@@ -6,6 +6,7 @@ import cl.bibliotech.clientes_service.model.Cliente;
 import cl.bibliotech.clientes_service.repository.ClienteRepository;
 import cl.bibliotech.clientes_service.service.ClienteService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Pruebas Unitarias para ClienteService")
 class ClienteServiceTest {
 
     @Mock
@@ -49,6 +51,7 @@ class ClienteServiceTest {
     }
 
     @Test
+    @DisplayName("Listar clientes: Debe retornar una lista de todos los clientes")
     void findAllDebeRetornarListaDeClientes() {
         when(clienteRepository.findAll()).thenReturn(List.of(cliente));
 
@@ -60,6 +63,7 @@ class ClienteServiceTest {
     }
 
     @Test
+    @DisplayName("Buscar por ID: Debe retornar el ClienteDTO cuando el ID existe")
     void findByIdDebeRetornarClienteDTOCuandoExiste() {
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(cliente));
         when(mapper.toDTO(cliente)).thenReturn(clienteDTO);
@@ -72,6 +76,7 @@ class ClienteServiceTest {
     }
 
     @Test
+    @DisplayName("Crear cliente: Debe guardar exitosamente y retornar la entidad Cliente")
     void saveDebeGuardarYRetornarCliente() {
         when(clienteRepository.save(cliente)).thenReturn(cliente);
 
@@ -82,6 +87,7 @@ class ClienteServiceTest {
     }
 
     @Test
+    @DisplayName("Crear cliente: Debe lanzar IllegalArgumentException cuando el nombre está vacío")
     void saveDebeValidarNombreObligatorio() {
         cliente.setNombre("");
 
@@ -95,6 +101,7 @@ class ClienteServiceTest {
     }
 
     @Test
+    @DisplayName("Eliminar cliente: Debe llamar al repositorio correctamente para eliminar por ID")
     void deleteDebeLlamarAlRepositorio() {
         when(clienteRepository.existsById(1L)).thenReturn(true);
 
@@ -105,6 +112,7 @@ class ClienteServiceTest {
     }
 
     @Test
+    @DisplayName("Actualizar cliente: Debe modificar los datos y guardar cuando el cliente existe")
     void updateDebeActualizarDatosCuandoClienteExiste() {
         Cliente datosNuevos = new Cliente(null, "Juan Modificado", "nuevo@gmail.com", "nuevaPass");
         Cliente clienteGuardado = new Cliente(1L, "Juan Modificado", "nuevo@gmail.com", "nuevaPass");
@@ -120,6 +128,7 @@ class ClienteServiceTest {
     }
 
     @Test
+    @DisplayName("Actualizar cliente: Debe lanzar IllegalArgumentException si el ID es inválido (ej. 0 o negativo)")
     void updateDebeValidarIdInvalido() {
         IllegalArgumentException error = assertThrows(
                 IllegalArgumentException.class,
@@ -131,6 +140,7 @@ class ClienteServiceTest {
     }
 
     @Test
+    @DisplayName("Actualizar cliente: Debe lanzar RuntimeException cuando el cliente a modificar no existe")
     void updateDebeLanzarErrorCuandoNoExiste() {
         when(clienteRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -144,6 +154,7 @@ class ClienteServiceTest {
     }
 
     @Test
+    @DisplayName("Buscar por nombre: Debe retornar una lista de ClienteDTO si hay coincidencias")
     void findByNombreDebeRetornarListaDTO() {
         when(clienteRepository.findByNombreContainingIgnoreCase("Juan")).thenReturn(List.of(cliente));
         when(mapper.toDTO(cliente)).thenReturn(clienteDTO);
@@ -155,6 +166,7 @@ class ClienteServiceTest {
     }
 
     @Test
+    @DisplayName("Buscar por nombre: Debe lanzar IllegalArgumentException si el parámetro de búsqueda está vacío")
     void findByNombreDebeLanzarErrorSiVacio() {
         IllegalArgumentException error = assertThrows(
                 IllegalArgumentException.class,
@@ -164,6 +176,7 @@ class ClienteServiceTest {
     }
 
     @Test
+    @DisplayName("Buscar por email: Debe retornar el ClienteDTO correspondiente al correo exacto")
     void findByEmailDebeRetornarDTO() {
         when(clienteRepository.findByEmailIgnoreCase("juan@gmail.com")).thenReturn(Optional.of(cliente));
         when(mapper.toDTO(cliente)).thenReturn(clienteDTO);
@@ -174,6 +187,7 @@ class ClienteServiceTest {
     }
 
     @Test
+    @DisplayName("Buscar por email: Debe lanzar RuntimeException si el correo no está registrado")
     void findByEmailDebeLanzarErrorSiNoExiste() {
         when(clienteRepository.findByEmailIgnoreCase("noexiste@gmail.com")).thenReturn(Optional.empty());
 
@@ -185,6 +199,7 @@ class ClienteServiceTest {
     }
 
     @Test
+    @DisplayName("Buscar por dominio: Debe formatear correctamente la búsqueda y retornar la lista de ClienteDTO")
     void findByDominioEmailDebeNormalizarYRetornar() {
         when(clienteRepository.findByEmailEndingWithIgnoreCase("@gmail.com")).thenReturn(List.of(cliente));
         when(mapper.toDTO(cliente)).thenReturn(clienteDTO);
@@ -196,6 +211,7 @@ class ClienteServiceTest {
     }
 
     @Test
+    @DisplayName("Contar clientes: Debe retornar la cantidad total de registros en la base de datos")
     void countDebeRetornarTotal() {
         when(clienteRepository.count()).thenReturn(42L);
 

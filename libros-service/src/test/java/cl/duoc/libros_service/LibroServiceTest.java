@@ -8,6 +8,7 @@ import cl.duoc.libros_service.model.Libro;
 import cl.duoc.libros_service.repository.LibroRepository;
 import cl.duoc.libros_service.service.LibroService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,6 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Pruebas Unitarias para LibroService")
 class LibroServiceTest {
 
     @Mock
@@ -50,7 +52,7 @@ class LibroServiceTest {
         // Inicializamos los objetos que usaremos en las pruebas
         libro = new Libro(1L, "El Señor de los Anillos", 100L, 5L);
 
-        autorDTO = new AutorDTO(); // Asumiendo que tiene constructor vacío, ajusta si es necesario
+        autorDTO = new AutorDTO(); // Asumiendo que tiene constructor vacio, ajusta si es necesario
         autorDTO.setId(100L);
         autorDTO.setNombre("J.R.R. Tolkien");
 
@@ -62,6 +64,7 @@ class LibroServiceTest {
     }
 
     @Test
+    @DisplayName("Listar libros: Debe retornar una lista de todos los libros con sus autores mapeados a DTO")
     void findAllDebeRetornarLibrosMapeados() {
         when(libroRepository.findAll()).thenReturn(List.of(libro));
         when(autorClient.buscarPorId(100L)).thenReturn(autorDTO);
@@ -79,6 +82,7 @@ class LibroServiceTest {
     }
 
     @Test
+    @DisplayName("Buscar por ID: Debe retornar el LibroDTO correctamente cuando el ID existe")
     void findByIdDebeRetornarLibroCuandoExiste() {
         when(libroRepository.findById(1L)).thenReturn(Optional.of(libro));
         when(autorClient.buscarPorId(100L)).thenReturn(autorDTO);
@@ -92,6 +96,7 @@ class LibroServiceTest {
     }
 
     @Test
+    @DisplayName("Buscar por ID: Debe lanzar IllegalArgumentException cuando el ID es inválido o negativo")
     void findByIdDebeLanzarErrorCuandoIdEsInvalido() {
         IllegalArgumentException error = assertThrows(
                 IllegalArgumentException.class,
@@ -103,6 +108,7 @@ class LibroServiceTest {
     }
 
     @Test
+    @DisplayName("Crear libro: Debe guardar exitosamente y retornar el DTO cuando los datos son válidos")
     void saveDebeGuardarLibroValido() {
         when(libroRepository.save(libro)).thenReturn(libro);
         when(autorClient.buscarPorId(100L)).thenReturn(autorDTO);
@@ -116,6 +122,7 @@ class LibroServiceTest {
     }
 
     @Test
+    @DisplayName("Crear libro: Debe lanzar IllegalArgumentException cuando el título es nulo o está en blanco")
     void saveDebeLanzarErrorCuandoTituloEsNuloOBlanco() {
         libro.setTitulo("");
 
@@ -129,6 +136,7 @@ class LibroServiceTest {
     }
 
     @Test
+    @DisplayName("Actualizar libro: Debe modificar los datos, consultar al cliente Autor y retornar el DTO actualizado")
     void updateDebeActualizarLibroCuandoExiste() {
         Libro datosActualizados = new Libro(null, "Cien anos de soledad", 100L, 8L);
         Libro libroActualizado = new Libro(1L, "Cien anos de soledad", 100L, 8L);
@@ -148,6 +156,7 @@ class LibroServiceTest {
     }
 
     @Test
+    @DisplayName("Actualizar libro: Debe lanzar RuntimeException cuando el libro a modificar no existe")
     void updateDebeLanzarErrorCuandoNoExiste() {
         when(libroRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -161,6 +170,7 @@ class LibroServiceTest {
     }
 
     @Test
+    @DisplayName("Eliminar libro: Debe eliminar el registro correctamente a través del ID cuando existe")
     void deleteDebeEliminarLibroCuandoExiste() {
         when(libroRepository.existsById(1L)).thenReturn(true);
 
@@ -171,6 +181,7 @@ class LibroServiceTest {
     }
 
     @Test
+    @DisplayName("Eliminar libro: Debe lanzar RuntimeException si se intenta eliminar un libro que no existe")
     void deleteDebeLanzarErrorCuandoNoExiste() {
         when(libroRepository.existsById(1L)).thenReturn(false);
 
@@ -184,6 +195,7 @@ class LibroServiceTest {
     }
 
     @Test
+    @DisplayName("Buscar por bajo stock: Debe retornar la lista de libros cuyo stock sea menor o igual al solicitado")
     void findBajoStockDebeRetornarListaDeLibros() {
         when(libroRepository.findByStockLessThanEqual(2L)).thenReturn(List.of(libro));
         when(autorClient.buscarPorId(100L)).thenReturn(autorDTO);
@@ -196,6 +208,7 @@ class LibroServiceTest {
     }
 
     @Test
+    @DisplayName("Buscar por bajo stock: Debe lanzar IllegalArgumentException si el valor buscado es negativo")
     void findBajoStockDebeValidarMaximoNegativo() {
         IllegalArgumentException error = assertThrows(
                 IllegalArgumentException.class,
@@ -206,6 +219,7 @@ class LibroServiceTest {
     }
 
     @Test
+    @DisplayName("Contar libros: Debe retornar la cantidad total de libros registrados en la base de datos")
     void countDebeRetornarCantidadTotal() {
         when(libroRepository.count()).thenReturn(15L);
 

@@ -7,6 +7,7 @@ import cl.duoc.autor_service.model.Autor;
 import cl.duoc.autor_service.repository.AutorRepository;
 import cl.duoc.autor_service.service.AutorService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,6 +24,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Pruebas Unitarias para AutorService")
 class AutorServiceTest {
 
     @Mock
@@ -48,6 +50,7 @@ class AutorServiceTest {
     }
 
     @Test
+    @DisplayName("Listar autores: Debe retornar una lista de autores convertidos a DTO")
     void findAllDebeRetornarAutoresMapeados() {
         when(autorRepository.findAll()).thenReturn(List.of(autor));
         when(autorMapper.toDTO(autor)).thenReturn(autorDTO);
@@ -61,6 +64,7 @@ class AutorServiceTest {
     }
 
     @Test
+    @DisplayName("Buscar por ID: Debe retornar el autor correctamente cuando el ID existe")
     void findByIdDebeRetornarAutorCuandoExiste() {
         when(autorRepository.findById(1L)).thenReturn(Optional.of(autor));
         when(autorMapper.toDTO(autor)).thenReturn(autorDTO);
@@ -73,6 +77,7 @@ class AutorServiceTest {
     }
 
     @Test
+    @DisplayName("Buscar por ID: Debe lanzar AutorNotFoundException cuando el autor no existe")
     void findByIdDebeLanzarNotFoundCuandoNoExiste() {
         when(autorRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -86,6 +91,7 @@ class AutorServiceTest {
     }
 
     @Test
+    @DisplayName("Buscar por ID: Debe lanzar IllegalArgumentException cuando el ID es inválido (ej. 0 o negativo)")
     void findByIdDebeLanzarErrorConIdInvalido() {
         IllegalArgumentException error = assertThrows(
                 IllegalArgumentException.class,
@@ -96,6 +102,7 @@ class AutorServiceTest {
     }
 
     @Test
+    @DisplayName("Crear autor: Debe guardar exitosamente y retornar el DTO cuando los datos son válidos")
     void saveDebeGuardarAutorValido() {
         when(autorRepository.save(autor)).thenReturn(autor);
         when(autorMapper.toDTO(autor)).thenReturn(autorDTO);
@@ -107,6 +114,7 @@ class AutorServiceTest {
     }
 
     @Test
+    @DisplayName("Crear autor: Debe lanzar IllegalArgumentException cuando el nombre está vacío")
     void saveDebeLanzarErrorCuandoNombreEstaVacio() {
         autor.setNombre("");
 
@@ -119,6 +127,7 @@ class AutorServiceTest {
     }
 
     @Test
+    @DisplayName("Eliminar autor: Debe eliminar el registro correctamente cuando el ID existe")
     void deleteDebeEliminarAutorCuandoExiste() {
         when(autorRepository.existsById(1L)).thenReturn(true);
 

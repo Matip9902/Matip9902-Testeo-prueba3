@@ -6,6 +6,7 @@ import cl.duoc.sucursal_service.model.Sucursal;
 import cl.duoc.sucursal_service.repository.SucursalRepository;
 import cl.duoc.sucursal_service.service.SucursalService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,6 +26,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Pruebas Unitarias para SucursalService")
 class SucursalServiceTest {
 
     @Mock
@@ -50,6 +52,7 @@ class SucursalServiceTest {
     }
 
     @Test
+    @DisplayName("Listar sucursales: Debe retornar una lista de todas las sucursales convertidas a DTO")
     void findAllDebeRetornarSucursalesMapeadas() {
         when(sucursalRepository.findAll()).thenReturn(List.of(sucursal));
         when(sucursalMapper.toDTO(sucursal)).thenReturn(sucursalDTO);
@@ -63,6 +66,7 @@ class SucursalServiceTest {
     }
 
     @Test
+    @DisplayName("Buscar por ID: Debe retornar el SucursalDTO correspondiente cuando la sucursal existe")
     void findByIdDebeRetornarSucursalCuandoExiste() {
         when(sucursalRepository.findById(1L)).thenReturn(Optional.of(sucursal));
         when(sucursalMapper.toDTO(sucursal)).thenReturn(sucursalDTO);
@@ -75,6 +79,7 @@ class SucursalServiceTest {
     }
 
     @Test
+    @DisplayName("Crear sucursal: Debe guardar exitosamente y retornar el DTO cuando los datos son válidos")
     void saveDebeGuardarSucursalValida() {
         when(sucursalRepository.save(sucursal)).thenReturn(sucursal);
         when(sucursalMapper.toDTO(sucursal)).thenReturn(sucursalDTO);
@@ -86,6 +91,7 @@ class SucursalServiceTest {
     }
 
     @Test
+    @DisplayName("Crear sucursal: Debe lanzar IllegalArgumentException si la cantidad de empleados es negativa")
     void saveDebeLanzarErrorConCantidadEmpleadosNegativa() {
         sucursal.setCantidadEmpleados(-1);
 
@@ -98,6 +104,7 @@ class SucursalServiceTest {
     }
 
     @Test
+    @DisplayName("Actualizar sucursal: Debe modificar los datos, guardar en el repositorio y retornar el DTO actualizado")
     void updateDebeActualizarSucursalCuandoExiste() {
         Sucursal datosActualizados = new Sucursal(null, "Providencia", "Av. Nueva 123", 12);
         Sucursal sucursalActualizada = new Sucursal(1L, "Providencia", "Av. Nueva 123", 12);
@@ -120,6 +127,7 @@ class SucursalServiceTest {
     }
 
     @Test
+    @DisplayName("Actualizar sucursal: Debe lanzar RuntimeException cuando la sucursal a modificar no existe")
     void updateDebeLanzarErrorCuandoNoExiste() {
         when(sucursalRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -133,6 +141,7 @@ class SucursalServiceTest {
     }
 
     @Test
+    @DisplayName("Actualizar sucursal: Debe lanzar IllegalArgumentException si el ID proporcionado es inválido o negativo")
     void updateDebeValidarIdInvalido() {
         IllegalArgumentException error = assertThrows(
                 IllegalArgumentException.class,
@@ -144,6 +153,7 @@ class SucursalServiceTest {
     }
 
     @Test
+    @DisplayName("Eliminar sucursal: Debe eliminar el registro correctamente cuando el ID de la sucursal existe")
     void deleteDebeEliminarSucursalCuandoExiste() {
         when(sucursalRepository.existsById(1L)).thenReturn(true);
 
@@ -154,6 +164,7 @@ class SucursalServiceTest {
     }
 
     @Test
+    @DisplayName("Eliminar sucursal: Debe lanzar RuntimeException si se intenta eliminar una sucursal que no existe")
     void deleteDebeLanzarErrorCuandoNoExiste() {
         when(sucursalRepository.existsById(99L)).thenReturn(false);
 
@@ -167,6 +178,7 @@ class SucursalServiceTest {
     }
 
     @Test
+    @DisplayName("Buscar por dotación: Debe lanzar IllegalArgumentException si la cantidad máxima de empleados buscada es negativa")
     void findConDotacionHastaDebeValidarMaximo() {
         IllegalArgumentException error = assertThrows(
                 IllegalArgumentException.class,
