@@ -7,6 +7,7 @@ import cl.duoc.autor_service.model.Autor;
 import cl.duoc.autor_service.service.AutorService;
 import jakarta.validation.Validation;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -27,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
+@DisplayName("Testing en la capa conttroller de autor")
 class AutorControllerTest {
 
     @Mock
@@ -50,7 +52,7 @@ class AutorControllerTest {
         autorDTO.setApellido("Garcia Marquez");
         autorDTO.setNacionalidad("Colombiana");
     }
-
+    @DisplayName("Debe retornar una lista de autores")
     @Test
     void listarDebeRetornarOk() throws Exception {
         when(autorService.findAll()).thenReturn(List.of(autorDTO));

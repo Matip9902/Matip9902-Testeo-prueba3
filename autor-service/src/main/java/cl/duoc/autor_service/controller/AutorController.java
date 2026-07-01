@@ -67,7 +67,18 @@ public class AutorController {
                                       "nacionalidad": "Colombiana"
                                     }
                                     """))),
-            @ApiResponse(responseCode = "400", description = "Parametro invalido", content = @Content),
+            @ApiResponse(responseCode = "400", description = "Parametro invalido", content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = AutorDTO.class),
+                    examples = @ExampleObject(value = """
+                                    [
+                                      {
+                                        "id": 1,
+                                        "nombre": "Gabriel",
+                                        "apellido": "Garcia Marquez",
+                                        "nacionalidad": "Colombiana"
+                                      }
+                                    ]
+                                    """))),
             @ApiResponse(responseCode = "404", description = "Autor no encontrado", content = @Content)
     })
     public ResponseEntity<AutorDTO> buscarPorId(
